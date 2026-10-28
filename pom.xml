@@ -23,6 +23,8 @@
         <!-- CI 的单元测试任务用 mvn test；集成任务用 -DskipUnitTests=true + mvn verify -->
         <skipUnitTests>false</skipUnitTests>
         <skipIntegrationTests>false</skipIntegrationTests>
+        <!-- 显式固定 Testcontainers 版本：CI 上依赖版本解析不能依赖 BOM 导入 -->
+        <testcontainers.version>1.21.4</testcontainers.version>
         <!-- 集成测试启动 Spring 时 DataInitializer 需要一个合规的超管初始口令 -->
         <it.admin.password>It-Admin-2026!Pass</it.admin.password>
     </properties>
@@ -93,11 +95,13 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>mysql</artifactId>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
