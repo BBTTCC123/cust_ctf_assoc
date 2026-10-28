@@ -29,7 +29,7 @@
         <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
         <a sec:authorize="!isAuthenticated()" th:href="@{/register}">注册</a>
         <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="inline-form">
-            <span class="who" th:text="${#authentication.name}">用户</span>
+            <span class="who" th:text="${#authentication != null ? #authentication.name : ''}">用户</span>
             <button type="submit" class="link-btn">退出</button>
         </form>
     </nav>

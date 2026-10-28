@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -73,12 +73,12 @@ class PermissionMatrixIT extends IntegrationTestBase {
         for (String url : ALL_ADMIN_PAGES) {
             mockMvc.perform(get(url))
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrlPattern("**/login"));
+                    .andExpect(redirectedUrl("/login"));
         }
         for (String url : List.of("/me", "/me/articles", "/me/profile", "/me/favorites")) {
             mockMvc.perform(get(url))
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrlPattern("**/login"));
+                    .andExpect(redirectedUrl("/login"));
         }
     }
 
