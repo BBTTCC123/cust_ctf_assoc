@@ -4,9 +4,48 @@
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
 <main class="container">
-    <h1 th:text="${greeting}">网络攻防协会</h1>
-    <p class="lead">考试成绩、漏洞战果、技术文章，都留在这里。</p>
-    <p><a th:href="@{/about}">看看这个站是干什么的</a></p>
+    <section class="hero">
+        <h1 th:text="${greeting}">网络攻防协会</h1>
+        <p class="lead">成绩、积分、技术文章，都留在这里，不再散在聊天记录里。</p>
+        <p class="hero-actions">
+            <a class="btn" th:href="@{/competitions}">看竞赛档案</a>
+            <a class="btn ghost" th:href="@{/join}">加入我们</a>
+        </p>
+    </section>
+
+    <section>
+        <h2>最新公告</h2>
+        <p th:if="${#lists.isEmpty(announcements)}" class="lead">暂无公告。</p>
+        <ul class="article-list">
+            <li th:each="a : ${announcements}">
+                <a th:href="@{/announcements/{id}(id=${a.id})}" th:text="${a.title}">公告</a>
+                <span class="muted" th:text="${#temporals.format(a.publishedAt,'yyyy-MM-dd')}">日期</span>
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>最近荣誉</h2>
+        <p th:if="${#lists.isEmpty(honors)}" class="lead">暂无记录。</p>
+        <ul class="honor-list">
+            <li th:each="h : ${honors}">
+                <span class="year" th:text="${h.year}">2025</span>
+                <div><strong th:text="${h.title}">荣誉</strong></div>
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>积分前三</h2>
+        <p th:if="${#lists.isEmpty(topPoints)}" class="lead">还没有积分记录。</p>
+        <ol class="top3">
+            <li th:each="row : ${topPoints}">
+                <span th:text="'用户' + ${row[0]}">成员</span>
+                <strong th:text="${row[1]} + ' 分'">0 分</strong>
+            </li>
+        </ol>
+        <p><a th:href="@{/points}">看完整积分榜</a></p>
+    </section>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

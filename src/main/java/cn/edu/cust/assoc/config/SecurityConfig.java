@@ -25,6 +25,8 @@ public class SecurityConfig {
                                 "/announcements/**", "/honors", "/join", "/css/**", "/js/**", "/images/**", "/login", "/error").permitAll()
                 // 媒体是否放行由 MediaController 自己判（已审核+公开的才给匿名看），这里必须先放进来
                 .requestMatchers("/media/**").permitAll()
+                // 健康检查给发布脚本用；生产上 8080 只监听本机，公网进不来
+                .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("SUPER_ADMIN", "CONTENT_ADMIN", "POINTS_ADMIN", "PR_ADMIN")
                 .anyRequest().authenticated()
             )

@@ -63,3 +63,10 @@ h1 { font-size: 2rem; margin: 0 0 12px; }
 .honor-list { list-style: none; padding: 0; }
 .honor-list li { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .honor-list .year { font-weight: 700; color: var(--accent); min-width: 56px; }
+.hero { padding: 26px 0 10px; }
+.hero-actions { display: flex; gap: 12px; margin-top: 16px; }
+.btn.ghost { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+section { margin-top: 34px; }
+h2 { font-size: 1.15rem; margin-bottom: 6px; }
+.top3 { padding-left: 20px; }
+.top3 li { margin: 6px 0; display: flex; gap: 12px; }
