@@ -13,11 +13,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.thymeleaf.context.WebContext;
-import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
@@ -55,13 +51,6 @@ class MemberPageTest {
                 null, radar);
 
         MockServletContext servletContext = new MockServletContext();
-        // sec:authorize 在 MVC 模式下会去找 WebApplicationContext；页面测试里注册一个空的即可
-        GenericWebApplicationContext wac = new GenericWebApplicationContext(servletContext);
-        wac.getBeanFactory().registerSingleton("securityExpressionHandler",
-                new DefaultWebSecurityExpressionHandler());
-        wac.refresh();
-        servletContext.setAttribute(
-                WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
         JakartaServletWebApplication application =
                 JakartaServletWebApplication.buildApplication(servletContext);
         WebContext context = new WebContext(application.buildExchange(
@@ -90,7 +79,6 @@ class MemberPageTest {
 
         SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.setTemplateResolver(resolver);
-        engine.addDialect(new SpringSecurityDialect());
         return engine;
     }
 }
