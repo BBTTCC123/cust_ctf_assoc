@@ -23,6 +23,10 @@ public interface PointsLedgerRepository extends JpaRepository<PointsLedgerEntity
     @Query("select coalesce(sum(l.points), 0) from PointsLedgerEntity l where l.vulnerabilityId = :vulnId")
     int sumByVulnerability(@Param("vulnId") Long vulnId);
 
+    /** 兑换可用余额的入口：流水合计（含冲抵负数）减去已通过兑换的成本。 */
+    @Query("select coalesce(sum(l.points), 0) from PointsLedgerEntity l where l.userId = :userId")
+    long sumByUser(@Param("userId") Long userId);
+
     @Query("select l.userId, sum(l.points) from PointsLedgerEntity l group by l.userId order by sum(l.points) desc")
     List<Object[]> rankAll();
 

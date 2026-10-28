@@ -8,4 +8,6 @@ import java.util.List;
 public interface AwardShareRepository extends JpaRepository<AwardShareEntity, Long> {
 
     List<AwardShareEntity> findByTeamAwardId(Long teamAwardId);
+
+    List<AwardShareEntity> findByUserId(Long userId);
 }

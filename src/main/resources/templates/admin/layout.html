@@ -24,6 +24,8 @@
     <a sec:authorize="hasAnyRole('SUPER_ADMIN','POINTS_ADMIN')" th:href="@{/admin/competitions}">比赛与奖项</a>
     <a sec:authorize="hasAnyRole('SUPER_ADMIN','POINTS_ADMIN')" th:href="@{/admin/points}">积分审核</a>
     <a sec:authorize="hasAnyRole('SUPER_ADMIN','POINTS_ADMIN')" th:href="@{/admin/appeals}">积分申诉</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','POINTS_ADMIN')" th:href="@{/admin/rewards}">积分兑换</a>
+    <a sec:authorize="hasRole('SUPER_ADMIN')" th:href="@{/admin/teams}">战队管理</a>
     <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN')" th:href="@{/admin/articles}">文章审核</a>
     <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN')" th:href="@{/admin/comments}">评论审核</a>
     <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN')" th:href="@{/admin/media}">媒体</a>

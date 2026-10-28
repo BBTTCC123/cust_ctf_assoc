@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('积分兑换')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1>积分兑换</h1>
+    <p class="lead">可用积分 <strong th:text="${view.balance()}">0</strong> 分
+        <span class="hint">（积分流水合计 − 已通过的兑换成本）</span></p>
+    <p th:if="${message}" class="ok" th:text="${message}"></p>
+    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+    <section>
+        <h2>可兑换资源</h2>
+        <p th:if="${#lists.isEmpty(view.items())}" class="lead">暂无可兑换资源，等管理员上架。</p>
+        <div class="reward-grid">
+            <article class="card reward-card" th:each="item : ${view.items()}">
+                <h2 th:text="${item.name()}">资源</h2>
+                <p class="hint" th:text="${item.description()} ?: '暂无说明'">说明</p>
+                <p class="reward-cost"><strong th:text="${item.costPoints()}">0</strong> 分
+                    · 剩余 <span th:text="${item.stock()}">0</span> 件</p>
+
+                <form th:if="${item.stock() > 0 and view.balance() >= item.costPoints()
+                               and !view.pendingItemIds().contains(item.id())}"
+                      th:action="@{/rewards/{id}/apply(id=${item.id()})}" method="post" class="reward-form">
+                    <input type="text" name="note" maxlength="500" placeholder="备注（可选，如尺码）">
+                    <button type="submit" class="btn">申请兑换</button>
+                </form>
+                <p class="hint" th:if="${view.pendingItemIds().contains(item.id())}">已有一条待审核的申请。</p>
+                <p class="hint" th:if="${item.stock() <= 0}">已兑完。</p>
+                <p class="hint" th:if="${item.stock() > 0 and view.balance() < item.costPoints()}">积分不足。</p>
+            </article>
+        </div>
+    </section>
+
+    <section>
+        <h2>我的兑换申请</h2>
+        <p th:if="${#lists.isEmpty(view.myRequests())}" class="lead">还没有提交过兑换申请。</p>
+        <table class="table" th:unless="${#lists.isEmpty(view.myRequests())}">
+            <thead><tr><th>资源</th><th>积分</th><th>状态</th><th>申请时间</th><th>审核备注</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${view.myRequests()}">
+                <td th:text="${r.itemName()}">资源</td>
+                <td th:text="${r.costPoints()}">0</td>
+                <td>
+                    <span class="tag" th:if="${r.state() == 'PENDING'}">待审核</span>
+                    <span class="tag" th:if="${r.state() == 'APPROVED'}">已通过</span>
+                    <span class="tag warn" th:if="${r.state() == 'REJECTED'}">已驳回</span>
+                    <span class="tag" th:if="${r.state() == 'CANCELLED'}">已取消</span>
+                </td>
+                <td th:text="${r.createdAt()}">时间</td>
+                <td th:text="${r.reviewNote()} ?: '—'">—</td>
+                <td>
+                    <form th:if="${r.state() == 'PENDING'}"
+                          th:action="@{/me/redemptions/{id}/cancel(id=${r.id()})}" method="post"
+                          class="inline-form" data-confirm="确定取消这条兑换申请？">
+                        <button type="submit" class="link-btn">取消</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <p class="hint">申请不扣分；管理员审核通过后才扣减余额与库存。驳回或取消不占用积分。</p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
