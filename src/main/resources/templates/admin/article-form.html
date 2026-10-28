@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('写文章')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>写一篇</h1>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+        <form th:action="@{/admin/articles}" method="post" class="form-grid single">
+            <label>标题<input type="text" name="title" required></label>
+            <label>摘要<input type="text" name="summary"></label>
+            <label>正文（Markdown）
+                <textarea name="contentMd" rows="16" required></textarea>
+            </label>
+            <label class="inline-check">
+                <input type="checkbox" name="involvesVuln" value="true"> 涉及漏洞点（勾了就只能站内可见）
+            </label>
+            <label>可见性
+                <select name="visibility">
+                    <option value="INTERNAL">站内</option>
+                    <option value="PUBLIC">公开</option>
+                </select>
+            </label>
+            <div class="form-actions"><button type="submit" class="btn">提交审核</button></div>
+        </form>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

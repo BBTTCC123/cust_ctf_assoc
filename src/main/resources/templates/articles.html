@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('技术空间')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1>技术空间</h1>
+    <p class="lead" th:if="${loggedIn}">站内可见的文章都在这儿；标了「公开」的游客也能看。</p>
+    <p class="lead" th:unless="${loggedIn}">这里只有公开文章。登录后能看到站内的全部内容。</p>
+    <p th:if="${#lists.isEmpty(articles)}" class="lead">还没有文章。</p>
+    <ul class="article-list">
+        <li th:each="a : ${articles}">
+            <a th:href="@{/articles/{id}(id=${a.id})}" th:text="${a.title}">标题</a>
+            <span class="tag" th:text="${a.visibility == 'PUBLIC'} ? '公开' : '站内'">站内</span>
+            <span class="tag warn" th:if="${a.involvesVuln}">涉漏洞点</span>
+        </li>
+    </ul>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

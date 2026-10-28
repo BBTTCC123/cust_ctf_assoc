@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${article.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1 th:text="${article.title}">标题</h1>
+    <p class="lead" th:if="${article.summary}" th:text="${article.summary}">摘要</p>
+    <div class="markdown-body" th:utext="${article.contentHtml}">正文</div>
+    <p class="hint">本文仅用于学习交流，禁止用于任何未授权测试。</p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

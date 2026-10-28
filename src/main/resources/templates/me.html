@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('我的积分')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1>我的积分</h1>
+    <p class="lead">总计 <strong th:text="${total}">0</strong> 分</p>
+    <p th:if="${message}" class="ok" th:text="${message}"></p>
+    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+    <p th:if="${#lists.isEmpty(ledger)}" class="lead">还没有积分记录。</p>
+    <table class="table" th:unless="${#lists.isEmpty(ledger)}">
+        <thead><tr><th>归属月</th><th>发生日</th><th>类型</th><th>分数</th><th>备注</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="l : ${ledger}">
+            <td th:text="${l.periodMonth}">2026-10</td>
+            <td th:text="${l.occurredOn}">日期</td>
+            <td th:text="${l.entryType}">EARN</td>
+            <td th:text="${l.points}">0</td>
+            <td th:text="${l.note} ?: '—'">—</td>
+            <td>
+                <form th:if="${l.entryType == 'EARN'}" th:action="@{/me/appeal}" method="post" class="inline-form">
+                    <input type="hidden" name="ledgerId" th:value="${l.id}">
+                    <input type="text" name="reason" placeholder="申诉理由" required>
+                    <button type="submit" class="link-btn">申诉</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

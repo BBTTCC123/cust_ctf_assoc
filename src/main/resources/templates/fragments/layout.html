@@ -13,9 +13,11 @@
         <a th:href="@{/}">首页</a>
         <a th:href="@{/competitions}">竞赛档案</a>
         <a th:href="@{/points}">积分榜</a>
+        <a th:href="@{/articles}">技术空间</a>
         <a th:href="@{/about}">关于</a>
         <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN','POINTS_ADMIN','PR_ADMIN')"
            th:href="@{/admin}">后台</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/me}">我的积分</a>
         <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
         <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="inline-form">
             <span class="who" th:text="${#authentication.name}">用户</span>
