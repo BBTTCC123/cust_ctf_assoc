@@ -14,6 +14,9 @@
         <a th:href="@{/competitions}">竞赛档案</a>
         <a th:href="@{/points}">积分榜</a>
         <a th:href="@{/articles}">技术空间</a>
+        <a th:href="@{/honors}">荣誉</a>
+        <a th:href="@{/announcements}">公告</a>
+        <a th:href="@{/join}">加入我们</a>
         <a th:href="@{/about}">关于</a>
         <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN','POINTS_ADMIN','PR_ADMIN')"
            th:href="@{/admin}">后台</a>

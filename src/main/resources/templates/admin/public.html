@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('公告与招新')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>公告与招新</h1>
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+        <h2>发公告</h2>
+        <form th:action="@{/admin/public/announcement}" method="post" class="form-grid single">
+            <label>标题<input type="text" name="title" required></label>
+            <label>正文（Markdown）<textarea name="contentMd" rows="6" required></textarea></label>
+            <label class="inline-check"><input type="checkbox" name="pinned" value="true"> 置顶</label>
+            <div class="form-actions"><button type="submit" class="btn">发布</button></div>
+        </form>
+
+        <h2>加一条荣誉</h2>
+        <form th:action="@{/admin/public/honor}" method="post" class="inline-grid">
+            <input type="text" name="title" placeholder="荣誉名称" required>
+            <input type="number" name="year" placeholder="年份" min="2000" max="2100" required>
+            <input type="text" name="description" placeholder="说明（可空）">
+            <button type="submit" class="btn">添加</button>
+        </form>
+
+        <h2>招新报名（<span th:text="${#lists.size(recruits)}">0</span>）</h2>
+        <table class="table" th:unless="${#lists.isEmpty(recruits)}">
+            <thead><tr><th>姓名</th><th>学号</th><th>学院</th><th>联系方式</th><th>时间</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${recruits}">
+                <td th:text="${r.name}">姓名</td>
+                <td th:text="${r.studentNo}">学号</td>
+                <td th:text="${r.college}">学院</td>
+                <td th:text="${r.contact}">联系方式</td>
+                <td th:text="${#temporals.format(r.createdAt,'yyyy-MM-dd HH:mm')}">时间</td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

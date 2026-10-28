@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('荣誉')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1>荣誉</h1>
+    <p class="lead">协会拿过的成绩，都记在这里。</p>
+    <ul class="honor-list">
+        <li th:each="h : ${items}">
+            <span class="year" th:text="${h.year}">2025</span>
+            <div>
+                <strong th:text="${h.title}">荣誉</strong>
+                <p th:if="${h.description}" th:text="${h.description}">说明</p>
+            </div>
+        </li>
+    </ul>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

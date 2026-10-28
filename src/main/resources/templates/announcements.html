@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('公告')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1>公告</h1>
+    <p th:if="${#lists.isEmpty(items)}" class="lead">还没有公告。</p>
+    <ul class="article-list">
+        <li th:each="a : ${items}">
+            <a th:href="@{/announcements/{id}(id=${a.id})}" th:text="${a.title}">标题</a>
+            <span class="tag" th:if="${a.pinned}">置顶</span>
+            <span class="muted" th:text="${#temporals.format(a.publishedAt,'yyyy-MM-dd')}">日期</span>
+        </li>
+    </ul>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -21,7 +21,8 @@ public class SecurityConfig {
         http
             .userDetailsService(userDetailsService)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/about", "/competitions", "/points", "/articles/**", "/css/**", "/js/**", "/images/**", "/login", "/error").permitAll()
+                .requestMatchers("/", "/about", "/competitions", "/points", "/articles/**",
+                                "/announcements/**", "/honors", "/join", "/css/**", "/js/**", "/images/**", "/login", "/error").permitAll()
                 // 媒体是否放行由 MediaController 自己判（已审核+公开的才给匿名看），这里必须先放进来
                 .requestMatchers("/media/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("SUPER_ADMIN", "CONTENT_ADMIN", "POINTS_ADMIN", "PR_ADMIN")

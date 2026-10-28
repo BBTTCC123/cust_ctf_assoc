@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${a.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <p><a th:href="@{/announcements}">← 全部公告</a></p>
+    <h1 th:text="${a.title}">标题</h1>
+    <p class="muted" th:text="${#temporals.format(a.publishedAt,'yyyy-MM-dd HH:mm')}">时间</p>
+    <div class="markdown-body" th:utext="${a.contentHtml}">正文</div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
