@@ -101,6 +101,15 @@ details summary { cursor: pointer; margin: 8px 0; }
 .meta { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .source-list { list-style: none; padding: 0; display: flex; gap: 18px; flex-wrap: wrap; }
 .source-list li { border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; display: flex; gap: 10px; }
+.profile-list { list-style: none; padding: 0; color: var(--muted); }
+.profile-list li { padding: 4px 0; }
+.privacy { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .85rem; }
+.ability-list { display: flex; flex-direction: column; gap: 8px; max-width: 520px; }
+.ability-row { display: grid; grid-template-columns: 80px 1fr 56px; gap: 10px; align-items: center; font-size: .9rem; }
+.ability-label { color: var(--muted); }
+.ability-count { color: var(--muted); text-align: right; }
+.bar { background: #eef2ff; border-radius: 999px; height: 10px; overflow: hidden; display: block; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
 
 /* 照片墙 */
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }

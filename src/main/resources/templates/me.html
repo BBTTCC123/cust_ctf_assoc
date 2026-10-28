@@ -7,6 +7,7 @@
     <h1>我的积分</h1>
     <p class="lead">总计 <strong th:text="${total}">0</strong> 分
         · <a th:href="@{/members/{id}(id=${memberId})}">我的公开积分页</a>
+        · <a th:href="@{/me/profile}">我的资料</a>
         · <a th:href="@{/me/articles}">我的文章</a>
         · <a th:href="@{/me/favorites}">我的收藏</a>
     </p>

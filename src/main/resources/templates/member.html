@@ -9,6 +9,32 @@
     <p class="lead">总分 <strong th:text="${member.total()}">0</strong> 分
         <span class="hint">（公开页只展示分数构成，不含佐证和内部备注）</span></p>
 
+    <section th:if="${member.profile() != null}">
+        <h2>公开资料</h2>
+        <ul class="profile-list">
+            <li th:if="${member.profile().realName() != null}" th:text="'姓名：' + ${member.profile().realName()}">姓名</li>
+            <li th:if="${member.profile().studentNo() != null}" th:text="'学号：' + ${member.profile().studentNo()}">学号</li>
+            <li th:text="'学院：' + ${member.profile().college()} + ' / ' + ${member.profile().major()} + ' / ' + ${member.profile().grade()}">学院专业年级</li>
+            <li th:if="${member.profile().phone() != null}" th:text="'手机：' + ${member.profile().phone()}">手机</li>
+            <li th:if="${member.profile().email() != null}" th:text="'邮箱：' + ${member.profile().email()}">邮箱</li>
+            <li th:if="${member.profile().blog() != null}">
+                <a th:href="${member.profile().blog()}" target="_blank" rel="noopener noreferrer">博客 / 主页</a>
+            </li>
+        </ul>
+    </section>
+
+    <section th:if="${!#lists.isEmpty(member.ability())}">
+        <h2>能力概览（按获奖类别）</h2>
+        <div class="ability-list">
+            <div class="ability-row" th:each="a : ${member.ability()}">
+                <span class="ability-label" th:text="${a.label()}">Web</span>
+                <span class="bar"><span th:style="'width:' + ${a.percent()} + '%'"></span></span>
+                <span class="ability-count" th:text="${a.count()} + ' 次'">1 次</span>
+            </div>
+        </div>
+        <p class="hint">统计口径：个人获奖记录（团队奖份额暂不计入）。</p>
+    </section>
+
     <h2>来源汇总</h2>
     <p th:if="${#maps.isEmpty(member.bySource())}" class="lead">还没有积分记录。</p>
     <ul class="source-list" th:unless="${#maps.isEmpty(member.bySource())}">

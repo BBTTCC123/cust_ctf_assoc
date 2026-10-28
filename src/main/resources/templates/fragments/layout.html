@@ -22,6 +22,7 @@
         <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN','POINTS_ADMIN','PR_ADMIN')"
            th:href="@{/admin}">后台</a>
         <a sec:authorize="isAuthenticated()" th:href="@{/me/articles}">我的文章</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/me/profile}">我的资料</a>
         <a sec:authorize="isAuthenticated()" th:href="@{/me}">我的积分</a>
         <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
         <a sec:authorize="!isAuthenticated()" th:href="@{/register}">注册</a>

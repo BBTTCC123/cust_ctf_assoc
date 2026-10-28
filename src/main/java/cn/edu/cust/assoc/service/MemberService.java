@@ -1,11 +1,17 @@
 package cn.edu.cust.assoc.service;
 
-import cn.edu.cust.assoc.dto.LeaderboardRow;
-import cn.edu.cust.assoc.dto.MemberLedgerRow;
-import cn.edu.cust.assoc.dto.MemberPointsView;
+import cn.edu.cust.assoc.domain.AwardEntity;
+import cn.edu.cust.assoc.domain.CompetitionEntity;
+import cn.edu.cust.assoc.domain.Competitions;
 import cn.edu.cust.assoc.domain.PointsLedgerEntity;
 import cn.edu.cust.assoc.domain.PointsRequestEntity;
 import cn.edu.cust.assoc.domain.UserEntity;
+import cn.edu.cust.assoc.dto.AbilityRow;
+import cn.edu.cust.assoc.dto.LeaderboardRow;
+import cn.edu.cust.assoc.dto.MemberLedgerRow;
+import cn.edu.cust.assoc.dto.MemberPointsView;
+import cn.edu.cust.assoc.repository.AwardRepository;
+import cn.edu.cust.assoc.repository.CompetitionRepository;
 import cn.edu.cust.assoc.repository.PointsRequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,19 +22,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/** 榜单与成员积分页的数据组装。对外只给昵称，不给登录名/邮箱/学号。 */
+/** 榜单与成员积分页的数据组装。对外只给昵称和隐私开关允许的字段。 */
 @Service
 public class MemberService {
 
     private final PointsService pointsService;
     private final PointsRequestRepository requestRepository;
     private final UserDirectoryService userDirectory;
+    private final MemberProfileService profileService;
+    private final AwardRepository awardRepository;
+    private final CompetitionRepository competitionRepository;
 
     public MemberService(PointsService pointsService, PointsRequestRepository requestRepository,
-                         UserDirectoryService userDirectory) {
+                         UserDirectoryService userDirectory, MemberProfileService profileService,
+                         AwardRepository awardRepository, CompetitionRepository competitionRepository) {
         this.pointsService = pointsService;
         this.requestRepository = requestRepository;
         this.userDirectory = userDirectory;
+        this.profileService = profileService;
+        this.awardRepository = awardRepository;
+        this.competitionRepository = competitionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -71,7 +84,39 @@ public class MemberService {
             bySource.merge(sourceLabel(source), entry.getPoints(), Integer::sum);
             total += entry.getPoints();
         }
-        return new MemberPointsView(userId, user.getNickname(), total, bySource, rows);
+        return new MemberPointsView(userId, user.getNickname(), total, bySource, rows,
+                profileService.publicView(userId).orElse(null), abilityOf(userId));
+    }
+
+    /** 能力概览：按竞赛类别统计个人获奖次数。 */
+    private List<AbilityRow> abilityOf(Long userId) {
+        List<AwardEntity> awards = awardRepository.findByUserIdOrderByIdDesc(userId);
+        if (awards.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, CompetitionEntity> competitions = competitionRepository
+                .findAllById(awards.stream().map(AwardEntity::getCompetitionId).distinct().toList())
+                .stream()
+                .collect(Collectors.toMap(CompetitionEntity::getId, c -> c));
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (AwardEntity award : awards) {
+            CompetitionEntity competition = competitions.get(award.getCompetitionId());
+            if (competition != null) {
+                counts.merge(categoryLabel(competition.getCategory()), 1, Integer::sum);
+            }
+        }
+        int max = counts.values().stream().mapToInt(Integer::intValue).max().orElse(1);
+        return counts.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .map(e -> new AbilityRow(e.getKey(), e.getValue(), e.getValue() * 100 / max))
+                .toList();
+    }
+
+    private String categoryLabel(String category) {
+        for (Competitions.Category value : Competitions.Category.values()) {
+            if (value.name().equals(category)) return value.getLabel();
+        }
+        return category;
     }
 
     private String sourceLabel(String sourceType) {

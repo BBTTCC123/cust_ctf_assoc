@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('我的资料')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <div class="row-between">
+        <h1>我的资料</h1>
+        <a class="btn ghost" th:href="@{/me}">我的积分</a>
+    </div>
+    <p class="lead">资料默认不公开；下面每个开关只控制对应字段在公开成员页是否显示。学院、专业、年级始终展示。</p>
+    <p th:if="${message}" class="ok" th:text="${message}"></p>
+    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+    <form th:action="@{/me/profile}" method="post" th:object="${form}" class="form-grid">
+        <label>真实姓名
+            <input type="text" th:field="*{realName}" maxlength="64" required>
+            <span class="privacy"><input type="checkbox" th:field="*{showRealName}"> 公开页显示</span>
+        </label>
+        <label>学号（可空）
+            <input type="text" th:field="*{studentNo}" pattern="\d{6,20}" maxlength="32">
+            <span class="privacy"><input type="checkbox" th:field="*{showStudentNo}"> 公开页显示</span>
+        </label>
+        <label>学院
+            <input type="text" th:field="*{college}" maxlength="128" required>
+        </label>
+        <label>专业
+            <input type="text" th:field="*{major}" maxlength="128" required>
+        </label>
+        <label>年级
+            <input type="text" th:field="*{grade}" maxlength="32" required placeholder="如 2024 级">
+        </label>
+        <label>手机（可空）
+            <input type="text" th:field="*{phone}" maxlength="32">
+            <span class="privacy"><input type="checkbox" th:field="*{showPhone}"> 公开页显示</span>
+        </label>
+        <label>邮箱（可空）
+            <input type="text" th:field="*{email}" maxlength="254">
+            <span class="privacy"><input type="checkbox" th:field="*{showEmail}"> 公开页显示</span>
+        </label>
+        <label>博客 / 主页（可空）
+            <input type="text" th:field="*{blog}" maxlength="2048" placeholder="https://...">
+            <span class="privacy"><input type="checkbox" th:field="*{showBlog}"> 公开页显示</span>
+        </label>
+        <div class="form-actions"><button type="submit" class="btn">保存资料</button></div>
+    </form>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
