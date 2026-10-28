@@ -44,3 +44,6 @@ h1 { font-size: 2rem; margin: 0 0 12px; }
 .share-row { display: flex; gap: 10px; margin-bottom: 8px; }
 .team-block { border-left: 3px solid var(--line); padding-left: 14px; margin: 12px 0; }
 .hint { color: var(--muted); font-size: .9rem; }
+.tabs { display: flex; gap: 8px; margin: 14px 0 8px; }
+.tabs a { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; color: var(--muted); font-size: .9rem; }
+.tabs a.active { background: var(--accent); border-color: var(--accent); color: #fff; }

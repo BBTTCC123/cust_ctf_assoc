@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('积分')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>积分审核</h1>
+        <p class="lead">申请通过才会生成流水；流水只增不改，要撤销就再记一条负数。</p>
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+        <h2>登记一笔挖洞</h2>
+        <form th:action="@{/admin/points/bounty}" method="post" class="inline-grid">
+            <select name="userId" required>
+                <option value="">选成员</option>
+                <option th:each="u : ${userNames}" th:value="${u.key}" th:text="${u.value}">成员</option>
+            </select>
+            <select name="level" required>
+                <option th:each="l : ${levels}" th:value="${l.name()}" th:text="${l.label}">等级</option>
+            </select>
+            <select name="scene" required>
+                <option th:each="s : ${scenes}" th:value="${s.name()}" th:text="${s.label}">场景</option>
+            </select>
+            <input type="text" name="target" placeholder="目标（域名或系统名）" required>
+            <input type="date" name="occurredOn" required>
+            <input type="text" name="proofUrl" placeholder="佐证链接" required>
+            <button type="submit" class="btn">提交申请</button>
+        </form>
+
+        <h2>待审（<span th:text="${#lists.size(pending)}">0</span>）</h2>
+        <table class="table" th:unless="${#lists.isEmpty(pending)}">
+            <thead><tr><th>id</th><th>成员</th><th>目标</th><th>分数</th><th>发生日</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${pending}">
+                <td th:text="${r.id}">1</td>
+                <td th:text="${userNames.get(r.userId)}">成员</td>
+                <td th:text="${r.target}">目标</td>
+                <td th:text="${r.points}">0</td>
+                <td th:text="${r.occurredOn}">日期</td>
+                <td class="actions">
+                    <form th:action="@{/admin/points/{id}/approve(id=${r.id})}" method="post" class="inline-form">
+                        <button type="submit" class="link-btn">通过</button>
+                    </form>
+                    <form th:action="@{/admin/points/{id}/reject(id=${r.id})}" method="post" class="inline-form">
+                        <button type="submit" class="link-btn danger">驳回</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${#lists.isEmpty(pending)}" class="lead">没有待审的申请。</p>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
