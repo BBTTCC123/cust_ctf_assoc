@@ -42,6 +42,9 @@ public class ArticleEntity {
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
 
+    @Column(name = "offline_at")
+    private LocalDateTime offlineAt;
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -73,6 +76,8 @@ public class ArticleEntity {
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
     public LocalDateTime getPublishedAt() { return publishedAt; }
     public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
+    public LocalDateTime getOfflineAt() { return offlineAt; }
+    public void setOfflineAt(LocalDateTime offlineAt) { this.offlineAt = offlineAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

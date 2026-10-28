@@ -4,23 +4,30 @@
 set -Eeuo pipefail
 
 APP_DIR=/opt/xyx
-JAR="$1"
+JAR="${1:-}"
 STAMP=$(date +%Y%m%d-%H%M%S)
 REL="$APP_DIR/releases/$STAMP"
+CHECK="$JAR.sha256"
 
-if [ ! -f "$JAR" ]; then
-  echo "找不到 jar：$JAR" >&2
+if [ -z "$JAR" ] || [ ! -f "$JAR" ]; then
+  echo "用法： ./deploy.sh /tmp/xxx.jar，且同目录要有 xxx.jar.sha256" >&2
+  exit 1
+fi
+if [ ! -f "$CHECK" ]; then
+  echo "缺少校验文件 $CHECK，拒绝发布" >&2
   exit 1
 fi
 
 mkdir -p "$REL"
 cp "$JAR" "$REL/app.jar"
 
-# 有 .sha256 就校验，没有就拒绝发布
-if [ -f "$JAR.sha256" ]; then
-  ( cd "$REL" && sha256sum -c "$JAR.sha256" --status ) || { echo "校验失败" >&2; exit 1; }
-else
-  echo "缺少 $JAR.sha256，拒绝发布" >&2
+# 上传的 jar 会被改名为 app.jar，所以按原 .sha256 里记录的值与 app.jar 的实际哈希比对，
+# 不能拿 sha256sum -c 去校验原文件名（那个文件已经不在了）。
+EXPECTED=$(awk 'NR==1 { print tolower($1) }' "$CHECK")
+ACTUAL=$(sha256sum "$REL/app.jar" | awk '{ print tolower($1) }')
+if [ -z "$EXPECTED" ] || [ "$EXPECTED" != "$ACTUAL" ]; then
+  echo "SHA256 校验失败：expected=$EXPECTED actual=$ACTUAL" >&2
+  rm -rf "$REL"
   exit 1
 fi
 
@@ -36,7 +43,7 @@ rollback() {
 }
 trap rollback ERR
 
-# 迁移前先备份数据库
+# 迁移前先备份数据库；备份脚本自身会做 my.cnf / 口令文件预检
 /usr/local/bin/backup-db.sh
 
 ln -sfn "$REL" "$APP_DIR/current"

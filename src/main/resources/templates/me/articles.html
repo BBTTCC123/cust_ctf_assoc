@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('我的文章')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <div class="row-between">
+        <h1>我的文章</h1>
+        <a class="btn" th:href="@{/me/articles/new}">写一篇</a>
+    </div>
+    <p class="lead">草稿只有你自己能看到；提交后等内容管理员审核。</p>
+    <p th:if="${message}" class="ok" th:text="${message}"></p>
+    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+    <p th:if="${#lists.isEmpty(articles)}" class="lead">还没有文章，写一篇试试。</p>
+    <table class="table" th:unless="${#lists.isEmpty(articles)}">
+        <thead><tr><th>标题</th><th>状态</th><th>可见性</th><th>驳回原因</th><th>更新时间</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${articles}">
+            <td th:text="${a.title()}">标题</td>
+            <td th:text="${a.state() == 'DRAFT' ? '草稿' : (a.state() == 'PENDING' ? '待审核' : (a.state() == 'PUBLISHED' ? '已发布' : (a.state() == 'REJECTED' ? '已驳回' : '已下架')))}">状态</td>
+            <td th:text="${a.visibility() == 'PUBLIC' ? '公开' : '站内'}">站内</td>
+            <td th:text="${a.rejectReason() != null ? a.rejectReason() : '—'}">—</td>
+            <td th:text="${a.updatedAt()}">时间</td>
+            <td class="actions">
+                <a th:if="${a.state() == 'DRAFT' or a.state() == 'REJECTED'}"
+                   th:href="@{/me/articles/{id}/edit(id=${a.id()})}">编辑</a>
+                <form th:if="${a.state() == 'DRAFT' or a.state() == 'REJECTED'}"
+                      th:action="@{/me/articles/{id}/submit(id=${a.id()})}" method="post" class="inline-form">
+                    <button type="submit" class="link-btn">提交审核</button>
+                </form>
+                <a th:if="${a.state() == 'PUBLISHED'}"
+                   th:href="@{/articles/{id}(id=${a.id()})}">查看</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

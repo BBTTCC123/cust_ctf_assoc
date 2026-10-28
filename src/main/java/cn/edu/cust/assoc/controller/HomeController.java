@@ -1,22 +1,20 @@
 package cn.edu.cust.assoc.controller;
 
-import cn.edu.cust.assoc.service.PointsService;
+import cn.edu.cust.assoc.service.MemberService;
 import cn.edu.cust.assoc.service.PublicContentService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
-
 @Controller
 public class HomeController {
 
     private final PublicContentService publicContent;
-    private final PointsService pointsService;
+    private final MemberService memberService;
 
-    public HomeController(PublicContentService publicContent, PointsService pointsService) {
+    public HomeController(PublicContentService publicContent, MemberService memberService) {
         this.publicContent = publicContent;
-        this.pointsService = pointsService;
+        this.memberService = memberService;
     }
 
     @GetMapping("/")
@@ -24,8 +22,7 @@ public class HomeController {
         model.addAttribute("greeting", "网络攻防协会");
         model.addAttribute("announcements", publicContent.announcements().stream().limit(3).toList());
         model.addAttribute("honors", publicContent.honors().stream().limit(3).toList());
-        List<Object[]> top = pointsService.ranking("ALL").stream().limit(3).toList();
-        model.addAttribute("topPoints", top);
+        model.addAttribute("topPoints", memberService.top(3));
         return "index";
     }
 

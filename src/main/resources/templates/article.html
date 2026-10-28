@@ -1,13 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(${article.title})}"></head>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${article.title()})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
 <main class="container">
-    <h1 th:text="${article.title}">标题</h1>
-    <p class="lead" th:if="${article.summary}" th:text="${article.summary}">摘要</p>
-    <div class="markdown-body" th:utext="${article.contentHtml}">正文</div>
+    <p class="crumb"><a th:href="@{/articles}">← 技术空间</a></p>
+    <h1 th:text="${article.title()}">标题</h1>
+    <p class="muted" th:text="${article.publishedAt() == null ? article.authorName() : article.authorName() + ' · ' + #temporals.format(article.publishedAt(),'yyyy-MM-dd')}">作者</p>
+    <p class="tag-row">
+        <span class="tag" th:each="t : ${article.tags()}" th:text="${t}">标签</span>
+        <span class="tag" th:text="${article.visibility() == 'PUBLIC'} ? '公开' : '站内'">站内</span>
+        <span class="tag warn" th:if="${article.involvesVuln()}">涉漏洞点</span>
+    </p>
+    <p th:if="${message}" class="ok" th:text="${message}"></p>
+    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+    <img th:if="${article.coverMediaId() != null}" class="article-cover"
+         th:src="@{/media/{id}(id=${article.coverMediaId()})}" th:alt="${article.title()}">
+
+    <p class="lead" th:if="${article.summary()}" th:text="${article.summary()}">摘要</p>
+    <div class="markdown-body" th:utext="${article.contentHtml()}">正文</div>
     <p class="hint">本文仅用于学习交流，禁止用于任何未授权测试。</p>
+
+    <div class="article-actions">
+        <a th:if="${article.canEdit()}" th:href="@{/me/articles/{id}/edit(id=${article.id()})}">编辑我的文章</a>
+        <form sec:authorize="isAuthenticated()" th:action="@{/articles/{id}/favorite(id=${article.id()})}"
+              method="post" class="inline-form">
+            <button type="submit" class="link-btn"
+                    th:text="${article.favorited()} ? '取消收藏' : '收藏'">收藏</button>
+        </form>
+        <span sec:authorize="!isAuthenticated()" class="hint">
+            <a th:href="@{/login}">登录</a>后可收藏和评论
+        </span>
+    </div>
+
+    <section class="comments">
+        <h2>评论</h2>
+        <p th:if="${#lists.isEmpty(article.comments())}" class="lead">还没有评论。</p>
+        <ul class="comment-list" th:unless="${#lists.isEmpty(article.comments())}">
+            <li th:each="c : ${article.comments()}">
+                <p class="meta">
+                    <strong th:text="${c.nickname()}">成员</strong>
+                    <span class="muted" th:text="${#temporals.format(c.createdAt(),'yyyy-MM-dd HH:mm')}">时间</span>
+                </p>
+                <p th:text="${c.content()}">评论内容</p>
+            </li>
+        </ul>
+        <form sec:authorize="isAuthenticated()" th:action="@{/articles/{id}/comments(id=${article.id()})}"
+              method="post" class="form-grid single">
+            <label>写评论（先审后发）
+                <textarea name="content" rows="4" required maxlength="1000"></textarea>
+            </label>
+            <div class="form-actions"><button type="submit" class="btn">提交评论</button></div>
+        </form>
+        <p sec:authorize="!isAuthenticated()" class="hint">
+            <a th:href="@{/login}">登录</a>后参与评论。
+        </p>
+    </section>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

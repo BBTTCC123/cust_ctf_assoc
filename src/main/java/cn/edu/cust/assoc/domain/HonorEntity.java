@@ -2,6 +2,8 @@ package cn.edu.cust.assoc.domain;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "honor")
 public class HonorEntity {
@@ -17,6 +19,9 @@ public class HonorEntity {
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -26,4 +31,6 @@ public class HonorEntity {
     public void setDescription(String description) { this.description = description; }
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }

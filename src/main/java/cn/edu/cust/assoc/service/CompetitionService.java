@@ -24,6 +24,16 @@ public class CompetitionService {
     }
 
     @Transactional(readOnly = true)
+    public List<CompetitionEntity> listBySeason(Short seasonYear) {
+        return seasonYear == null ? listAll() : repository.findBySeasonYearOrderByStartDateDesc(seasonYear);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Short> seasons() {
+        return repository.distinctSeasons();
+    }
+
+    @Transactional(readOnly = true)
     public CompetitionEntity get(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("比赛不存在：" + id));
@@ -45,7 +55,13 @@ public class CompetitionService {
 
     @Transactional
     public void delete(Long id) {
-        repository.deleteById(id);
+        try {
+            repository.deleteById(id);
+            repository.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new cn.edu.cust.assoc.common.BizException(
+                    "这场比赛已经有关联奖项或积分记录，不能删除；请先处理关联数据");
+        }
     }
 
     @Transactional(readOnly = true)

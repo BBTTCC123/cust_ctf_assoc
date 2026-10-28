@@ -4,5 +4,7 @@
 <body style="font-family: system-ui; text-align: center; padding: 80px 20px;">
 <h1 style="font-size: 3rem; margin: 0;">500</h1>
 <p>服务出了点问题，已经记下来了。回<a th:href="@{/}">首页</a>再试。</p>
+<p th:if="${requestId}" style="color:#616e7c;font-size:.85rem;"
+   th:text="'错误编号：' + ${requestId}">错误编号</p>
 </body>
 </html>

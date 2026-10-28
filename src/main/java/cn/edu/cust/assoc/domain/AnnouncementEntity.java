@@ -23,6 +23,9 @@ public class AnnouncementEntity {
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean pinned;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -35,4 +38,6 @@ public class AnnouncementEntity {
     public LocalDateTime getPublishedAt() { return publishedAt; }
     public Boolean getPinned() { return pinned; }
     public void setPinned(Boolean pinned) { this.pinned = pinned; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }

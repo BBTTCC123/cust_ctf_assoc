@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('注册')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container" style="max-width: 520px;">
+    <h1>邀请码注册</h1>
+    <p class="lead">账号只能通过协会发放的邀请码注册；注册后即可登录。</p>
+    <p th:if="${message}" class="ok" th:text="${message}"></p>
+    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+    <form th:action="@{/register}" method="post" class="form-grid single">
+        <label>邀请码<input type="text" name="inviteCode" th:value="${code}" required autocomplete="off"></label>
+        <label>登录名（字母/数字/下划线，4-32 位）
+            <input type="text" name="username" required pattern="[A-Za-z0-9_]{4,32}" autocomplete="username">
+        </label>
+        <label>昵称<input type="text" name="nickname" required maxlength="64"></label>
+        <label>密码（至少 12 位，含大小写/数字/符号中的三类）
+            <input type="password" name="password" required minlength="12" autocomplete="new-password">
+        </label>
+        <label>确认密码
+            <input type="password" name="confirmPassword" required minlength="12" autocomplete="new-password">
+        </label>
+        <div class="form-actions"><button type="submit" class="btn">注册</button></div>
+    </form>
+    <p class="hint">已有账号？<a th:href="@{/login}">去登录</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

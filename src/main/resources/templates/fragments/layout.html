@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title} + ' · 网络攻防协会'">网络攻防协会</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/js/app.js}" defer></script>
 </head>
 <body>
 <header th:fragment="nav" class="site-header">
@@ -20,8 +21,11 @@
         <a th:href="@{/about}">关于</a>
         <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN','POINTS_ADMIN','PR_ADMIN')"
            th:href="@{/admin}">后台</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/me/articles}">我的文章</a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/me/profile}">我的资料</a>
         <a sec:authorize="isAuthenticated()" th:href="@{/me}">我的积分</a>
         <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
+        <a sec:authorize="!isAuthenticated()" th:href="@{/register}">注册</a>
         <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="inline-form">
             <span class="who" th:text="${#authentication.name}">用户</span>
             <button type="submit" class="link-btn">退出</button>

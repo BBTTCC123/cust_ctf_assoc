@@ -7,30 +7,34 @@
     <aside th:replace="~{admin/layout :: sidebar}"></aside>
     <main class="admin-main">
         <h1>积分申诉</h1>
-        <p class="lead">申诉成立 → 原流水不动，另记一条负数冲抵。</p>
+        <p class="lead">申诉成立 → 原流水不动，另记一条负数冲抵。终态不能再次处理。</p>
         <p th:if="${message}" class="ok" th:text="${message}"></p>
         <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+        <p th:if="${#lists.isEmpty(appeals)}" class="lead">没有申诉。</p>
         <table class="table" th:unless="${#lists.isEmpty(appeals)}">
-            <thead><tr><th>id</th><th>流水</th><th>理由</th><th>状态</th><th>时间</th><th></th></tr></thead>
+            <thead><tr><th>id</th><th>流水</th><th>成员</th><th>理由</th><th>状态</th><th>处理人</th><th>时间</th><th></th></tr></thead>
             <tbody>
             <tr th:each="a : ${appeals}">
-                <td th:text="${a.id}">1</td>
-                <td th:text="${a.ledgerId}">1</td>
-                <td th:text="${a.reason}">理由</td>
-                <td th:text="${a.state}">OPEN</td>
-                <td th:text="${a.createdAt}">时间</td>
-                <td class="actions" th:if="${a.state == 'OPEN'}">
-                    <form th:action="@{/admin/appeals/{id}/accept(id=${a.id})}" method="post" class="inline-form">
+                <td th:text="${a.id()}">1</td>
+                <td th:text="${a.ledgerId()}">1</td>
+                <td th:text="${a.userName()}">成员</td>
+                <td th:text="${a.reason()}">理由</td>
+                <td th:text="${a.state()}">OPEN</td>
+                <td th:text="${a.handleByName() != null ? a.handleByName() : '—'}">—</td>
+                <td th:text="${a.createdAt()}">时间</td>
+                <td class="actions" th:if="${a.state() == 'OPEN'}">
+                    <form th:action="@{/admin/appeals/{id}/accept(id=${a.id()})}" method="post" class="inline-form"
+                          data-confirm="成立后会立即生成负数冲抵流水，确定？">
                         <button type="submit" class="link-btn">成立</button>
                     </form>
-                    <form th:action="@{/admin/appeals/{id}/reject(id=${a.id})}" method="post" class="inline-form">
+                    <form th:action="@{/admin/appeals/{id}/reject(id=${a.id()})}" method="post" class="inline-form">
+                        <input type="text" name="note" placeholder="驳回备注" maxlength="200">
                         <button type="submit" class="link-btn danger">驳回</button>
                     </form>
                 </td>
             </tr>
             </tbody>
         </table>
-        <p th:if="${#lists.isEmpty(appeals)}" class="lead">没有申诉。</p>
     </main>
 </div>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

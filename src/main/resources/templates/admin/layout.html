@@ -1,27 +1,36 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title} + ' · 管理后台'">管理后台</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:src="@{/js/app.js}" defer></script>
 </head>
 <body>
 <header th:fragment="topbar" class="site-header">
     <a class="brand" th:href="@{/}">网络攻防协会 · 后台</a>
     <nav>
         <a th:href="@{/}">回前台</a>
+        <a th:href="@{/password/change}">修改密码</a>
+        <form th:action="@{/logout}" method="post" class="inline-form">
+            <span class="who" th:text="${#authentication.name}">用户</span>
+            <button type="submit" class="link-btn">退出</button>
+        </form>
     </nav>
 </header>
 <aside th:fragment="sidebar" class="admin-sidebar">
     <a th:href="@{/admin}">总览</a>
-    <a th:href="@{/admin/competitions}">比赛与奖项</a>
-    <a th:href="@{/admin/points}">积分审核</a>
-    <a th:href="@{/admin/public}">公告与招新</a>
-    <a th:href="@{/admin/appeals}">积分申诉</a>
-    <a th:href="@{/admin/media}">媒体</a>
-    <a th:href="@{/admin/articles}">文章审核</a>
-    <a th:href="@{/admin/users}">账号</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','POINTS_ADMIN')" th:href="@{/admin/competitions}">比赛与奖项</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','POINTS_ADMIN')" th:href="@{/admin/points}">积分审核</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','POINTS_ADMIN')" th:href="@{/admin/appeals}">积分申诉</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN')" th:href="@{/admin/articles}">文章审核</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN')" th:href="@{/admin/comments}">评论审核</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN')" th:href="@{/admin/media}">媒体</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN')" th:href="@{/admin/sensitive-words}">敏感词</a>
+    <a sec:authorize="hasAnyRole('SUPER_ADMIN','PR_ADMIN')" th:href="@{/admin/public}">公告与招新</a>
+    <a sec:authorize="hasRole('SUPER_ADMIN')" th:href="@{/admin/users}">账号与邀请</a>
+    <a sec:authorize="hasRole('SUPER_ADMIN')" th:href="@{/admin/audit}">审计日志</a>
 </aside>
 </body>
 </html>

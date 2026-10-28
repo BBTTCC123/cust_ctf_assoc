@@ -1,6 +1,7 @@
 package cn.edu.cust.assoc.repository;
 
 import cn.edu.cust.assoc.domain.PointsLedgerEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,8 @@ public interface PointsLedgerRepository extends JpaRepository<PointsLedgerEntity
 
     boolean existsByIdempotencyKey(String key);
 
+    boolean existsByReversesId(Long reversesId);
+
     Optional<PointsLedgerEntity> findByIdempotencyKey(String key);
 
     List<PointsLedgerEntity> findByUserIdOrderByOccurredOnDesc(Long userId);
@@ -23,9 +26,18 @@ public interface PointsLedgerRepository extends JpaRepository<PointsLedgerEntity
     @Query("select l.userId, sum(l.points) from PointsLedgerEntity l group by l.userId order by sum(l.points) desc")
     List<Object[]> rankAll();
 
+    @Query("select l.userId, sum(l.points) from PointsLedgerEntity l group by l.userId order by sum(l.points) desc")
+    List<Object[]> rankAll(Pageable pageable);
+
     @Query("select l.userId, sum(l.points) from PointsLedgerEntity l where l.periodMonth in :months group by l.userId order by sum(l.points) desc")
     List<Object[]> rankByMonths(@Param("months") Collection<String> months);
 
+    @Query("select l.userId, sum(l.points) from PointsLedgerEntity l where l.periodMonth in :months group by l.userId order by sum(l.points) desc")
+    List<Object[]> rankByMonths(@Param("months") Collection<String> months, Pageable pageable);
+
     @Query("select l.userId, sum(l.points) from PointsLedgerEntity l where l.periodMonth like concat(:prefix, '%') group by l.userId order by sum(l.points) desc")
     List<Object[]> rankByPrefix(@Param("prefix") String prefix);
+
+    @Query("select l.userId, sum(l.points) from PointsLedgerEntity l where l.periodMonth like concat(:prefix, '%') group by l.userId order by sum(l.points) desc")
+    List<Object[]> rankByPrefix(@Param("prefix") String prefix, Pageable pageable);
 }

@@ -7,30 +7,35 @@
     <aside th:replace="~{admin/layout :: sidebar}"></aside>
     <main class="admin-main">
         <h1>媒体</h1>
-        <p class="lead">上传的文件一律先落私有区，审核通过才进公共区。</p>
+        <p class="lead">上传的文件先落私有区；审核时选择可见范围，通过后才对外提供。</p>
         <p th:if="${message}" class="ok" th:text="${message}"></p>
         <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
 
         <form th:action="@{/admin/media/upload}" method="post" enctype="multipart/form-data" class="inline-grid">
             <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required>
-            <button type="submit" class="btn">上传</button>
+            <button type="submit" class="btn">上传（最大 10MB）</button>
         </form>
 
         <h2>待审（<span th:text="${#lists.size(pending)}">0</span>）</h2>
         <table class="table" th:unless="${#lists.isEmpty(pending)}">
-            <thead><tr><th>id</th><th>文件名</th><th>大小</th><th>上传人</th><th>预览</th><th></th></tr></thead>
+            <thead><tr><th>id</th><th>文件名</th><th>大小</th><th>上传人</th><th>预览</th><th>审核</th></tr></thead>
             <tbody>
             <tr th:each="m : ${pending}">
-                <td th:text="${m.id}">1</td>
-                <td th:text="${m.originalName}">a.jpg</td>
-                <td th:text="${m.bytes}">0</td>
-                <td th:text="${m.ownerUserId}">1</td>
-                <td><a th:href="@{/media/{id}(id=${m.id})}" target="_blank">打开</a></td>
+                <td th:text="${m.id()}">1</td>
+                <td th:text="${m.originalName()}">a.jpg</td>
+                <td th:text="${m.bytes()}">0</td>
+                <td th:text="${m.ownerName()}">成员</td>
+                <td><a th:href="@{/media/{id}(id=${m.id()})}" target="_blank" rel="noopener">打开</a></td>
                 <td class="actions">
-                    <form th:action="@{/admin/media/{id}/approve(id=${m.id})}" method="post" class="inline-form">
+                    <form th:action="@{/admin/media/{id}/approve(id=${m.id()})}" method="post" class="inline-form">
+                        <select name="visibility">
+                            <option value="MEMBER">仅成员</option>
+                            <option value="PUBLIC">公开</option>
+                            <option value="OWNER">仅上传人</option>
+                        </select>
                         <button type="submit" class="link-btn">通过</button>
                     </form>
-                    <form th:action="@{/admin/media/{id}/reject(id=${m.id})}" method="post" class="inline-form">
+                    <form th:action="@{/admin/media/{id}/reject(id=${m.id()})}" method="post" class="inline-form">
                         <button type="submit" class="link-btn danger">驳回</button>
                     </form>
                 </td>
@@ -38,6 +43,33 @@
             </tbody>
         </table>
         <p th:if="${#lists.isEmpty(pending)}" class="lead">没有待审文件。</p>
+
+        <h2>全部文件</h2>
+        <table class="table">
+            <thead><tr><th>id</th><th>文件名</th><th>上传人</th><th>状态</th><th>可见范围</th><th>操作</th></tr></thead>
+            <tbody>
+            <tr th:each="m : ${all}">
+                <td th:text="${m.id()}">1</td>
+                <td><a th:href="@{/media/{id}(id=${m.id()})}" target="_blank" rel="noopener"
+                       th:text="${m.originalName()}">文件</a></td>
+                <td th:text="${m.ownerName()}">成员</td>
+                <td th:text="${m.reviewState()}">PENDING</td>
+                <td th:text="${m.visibility()}">MEMBER</td>
+                <td class="actions">
+                    <form th:if="${m.reviewState() == 'APPROVED'}"
+                          th:action="@{/admin/media/{id}/revoke(id=${m.id()})}" method="post" class="inline-form"
+                          data-confirm="下架后所有引用处都会失效，确定？">
+                        <button type="submit" class="link-btn danger">下架</button>
+                    </form>
+                    <form th:if="${m.reviewState() != 'APPROVED'}"
+                          th:action="@{/admin/media/{id}/delete(id=${m.id()})}" method="post" class="inline-form"
+                          data-confirm="删除后不可恢复，确定？">
+                        <button type="submit" class="link-btn danger">删除</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </main>
 </div>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

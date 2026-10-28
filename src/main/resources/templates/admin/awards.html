@@ -70,6 +70,26 @@
             </div>
             <button type="submit" class="btn">记录团队奖</button>
         </form>
+        <h2>现场照片</h2>
+        <p class="hint">只能关联已审核通过的媒体；先到「媒体」页上传并审核通过，再填媒体 ID。</p>
+        <div class="photo-grid" th:unless="${#lists.isEmpty(photos)}">
+            <div class="photo-item" th:each="m : ${photos}">
+                <a th:href="@{/media/{id}(id=${m.id})}" target="_blank" rel="noopener">
+                    <img th:src="@{/media/{id}(id=${m.id})}" th:alt="${m.originalName}">
+                </a>
+                <form th:action="@{/admin/competitions/{id}/awards/photos/detach(id=${competition.id})}"
+                      method="post" class="inline-form">
+                    <input type="hidden" name="mediaId" th:value="${m.id}">
+                    <button type="submit" class="link-btn danger">解除</button>
+                </form>
+            </div>
+        </div>
+        <p th:if="${#lists.isEmpty(photos)}" class="lead">还没有照片。</p>
+        <form th:action="@{/admin/competitions/{id}/awards/photos(id=${competition.id})}"
+              method="post" class="inline-grid">
+            <input type="number" name="mediaId" min="1" placeholder="媒体 ID" required>
+            <button type="submit" class="btn">关联照片</button>
+        </form>
     </main>
 </div>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

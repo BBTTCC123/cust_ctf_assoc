@@ -9,12 +9,13 @@
     <p th:if="${message}" class="ok" th:text="${message}"></p>
     <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
     <form th:action="@{/join}" method="post" class="form-grid single">
-        <label>姓名<input type="text" name="name" required></label>
-        <label>学号<input type="text" name="studentNo" required pattern="\\d{6,20}"></label>
-        <label>学院<input type="text" name="college" required></label>
-        <label>专业<input type="text" name="major" required></label>
-        <label>联系方式（QQ / 微信 / 手机）<input type="text" name="contact" required></label>
-        <label>想说的话（可选）<textarea name="message" rows="4"></textarea></label>
+        <label>姓名<input type="text" name="name" required maxlength="64"></label>
+        <label>学号<input type="text" name="studentNo" required pattern="\d{6,20}"
+                        title="6 到 20 位数字" inputmode="numeric"></label>
+        <label>学院<input type="text" name="college" required maxlength="128"></label>
+        <label>专业<input type="text" name="major" required maxlength="128"></label>
+        <label>联系方式（QQ / 微信 / 手机）<input type="text" name="contact" required maxlength="128"></label>
+        <label>想说的话（可选）<textarea name="message" rows="4" maxlength="1000"></textarea></label>
         <div class="form-actions"><button type="submit" class="btn">提交报名</button></div>
     </form>
 </main>
