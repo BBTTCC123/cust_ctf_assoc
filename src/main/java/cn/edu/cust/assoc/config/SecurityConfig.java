@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .requestMatchers("/media/**").permitAll()
                 // 健康检查给发布脚本用；生产上 8080 只监听本机，公网进不来
                 .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/admin/users/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/admin/**").hasAnyRole("SUPER_ADMIN", "CONTENT_ADMIN", "POINTS_ADMIN", "PR_ADMIN")
                 .anyRequest().authenticated()
             )

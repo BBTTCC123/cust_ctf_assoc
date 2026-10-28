@@ -70,3 +70,5 @@ section { margin-top: 34px; }
 h2 { font-size: 1.15rem; margin-bottom: 6px; }
 .top3 { padding-left: 20px; }
 .top3 li { margin: 6px 0; display: flex; gap: 12px; }
+.role-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.role-chip { display: inline-flex; gap: 4px; align-items: center; font-size: .85rem; color: var(--muted); }

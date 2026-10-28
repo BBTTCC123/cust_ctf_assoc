@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('账号')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>账号</h1>
+        <p class="lead">角色决定能进哪个后台入口；禁用后立刻登不上。</p>
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+        <table class="table">
+            <thead><tr><th>账号</th><th>昵称</th><th>状态</th><th>角色</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.username}">admin</td>
+                <td th:text="${u.nickname}">昵称</td>
+                <td th:text="${u.status}">ACTIVE</td>
+                <td>
+                    <form th:action="@{/admin/users/{id}/roles(id=${u.id})}" method="post" class="role-form">
+                        <label th:each="r : ${roles}" class="role-chip">
+                            <input type="checkbox" name="roleIds" th:value="${r.id}"
+                                   th:checked="${userRoleIds.get(u.id).contains(r.id)}">
+                            <span th:text="${r.name}">角色</span>
+                        </label>
+                        <button type="submit" class="link-btn">保存</button>
+                    </form>
+                </td>
+                <td>
+                    <form th:action="@{/admin/users/{id}/status(id=${u.id})}" method="post" class="inline-form">
+                        <input type="hidden" name="status" th:value="${u.status == 'ACTIVE'} ? 'DISABLED' : 'ACTIVE'">
+                        <button type="submit" class="link-btn" th:text="${u.status == 'ACTIVE'} ? '禁用' : '启用'">禁用</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
