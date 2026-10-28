@@ -20,6 +20,11 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- CI 的单元测试任务用 mvn test；集成任务用 -DskipUnitTests=true + mvn verify -->
+        <skipUnitTests>false</skipUnitTests>
+        <skipIntegrationTests>false</skipIntegrationTests>
+        <!-- 集成测试启动 Spring 时 DataInitializer 需要一个合规的超管初始口令 -->
+        <it.admin.password>It-Admin-2026!Pass</it.admin.password>
     </properties>
 
     <dependencies>
@@ -74,6 +79,27 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- 集成测试：真实 MySQL 容器（CI 与装了 Docker 的机器），禁用时自动跳过 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -81,6 +107,35 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipUnitTests}</skipTests>
+                    <environmentVariables>
+                        <ADMIN_PASSWORD>${it.admin.password}</ADMIN_PASSWORD>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+            <!-- 集成测试：*IT.java，在 verify 阶段跑；没有 Docker 时测试类自己跳过 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <skipITs>${skipIntegrationTests}</skipITs>
+                    <environmentVariables>
+                        <ADMIN_PASSWORD>${it.admin.password}</ADMIN_PASSWORD>
+                    </environmentVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

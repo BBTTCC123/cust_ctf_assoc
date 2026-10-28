@@ -18,6 +18,12 @@ out/
 Thumbs.db
 .DS_Store
 
+# Node / Playwright
+node_modules/
+e2e/test-results/
+e2e/playwright-report/
+e2e/blob-report/
+
 # Local config with secrets
 application-local.yml
 *.local.yml
