@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,6 +12,13 @@
     <nav>
         <a th:href="@{/}">首页</a>
         <a th:href="@{/about}">关于</a>
+        <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN','POINTS_ADMIN','PR_ADMIN')"
+           th:href="@{/admin}">后台</a>
+        <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="inline-form">
+            <span class="who" th:text="${#authentication.name}">用户</span>
+            <button type="submit" class="link-btn">退出</button>
+        </form>
     </nav>
 </header>
 <footer th:fragment="footer" class="site-footer">

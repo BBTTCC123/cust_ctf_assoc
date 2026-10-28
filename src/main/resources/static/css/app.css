@@ -14,3 +14,12 @@ h1 { font-size: 2rem; margin: 0 0 12px; }
 .login-form input { padding: 9px 11px; border: 1px solid var(--line); border-radius: 6px; font-size: 1rem; }
 .login-form button { padding: 10px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font-size: 1rem; cursor: pointer; }
 .login-form button:hover { opacity: .92; }
+.inline-form { display: inline-flex; align-items: center; gap: 8px; margin-left: 18px; }
+.who { color: var(--muted); font-size: .9rem; }
+.link-btn { background: none; border: 0; color: var(--accent); cursor: pointer; font-size: .95rem; padding: 0; }
+.admin-shell { display: flex; min-height: calc(100vh - 130px); }
+.admin-sidebar { width: 200px; border-right: 1px solid var(--line); padding: 22px 18px; display: flex; flex-direction: column; gap: 12px; }
+.admin-sidebar a { text-decoration: none; color: var(--muted); }
+.admin-sidebar a:hover { color: var(--accent); }
+.admin-main { flex: 1; padding: 28px 34px; }
+.role-list { color: var(--muted); font-size: .9rem; padding-left: 18px; }

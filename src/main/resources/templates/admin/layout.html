@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · 管理后台'">管理后台</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header th:fragment="topbar" class="site-header">
+    <a class="brand" th:href="@{/}">网络攻防协会 · 后台</a>
+    <nav>
+        <a th:href="@{/}">回前台</a>
+    </nav>
+</header>
+<aside th:fragment="sidebar" class="admin-sidebar">
+    <a th:href="@{/admin}">总览</a>
+    <a th:href="@{/admin/competitions}">比赛与奖项</a>
+    <a th:href="@{/admin/points}">积分审核</a>
+    <a th:href="@{/admin/articles}">文章审核</a>
+    <a th:href="@{/admin/users}">账号</a>
+</aside>
+</body>
+</html>

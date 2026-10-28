@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/layout :: head('总览')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>总览</h1>
+        <p class="lead" th:text="'当前登录：' + ${#authentication.name}">当前登录</p>
+        <ul class="role-list">
+            <li th:each="r : ${#authentication.authorities}" th:text="${r.authority}">ROLE</li>
+        </ul>
+        <p sec:authorize="hasRole('SUPER_ADMIN')">你是超管，能管账号、分权限、封号、看审计。</p>
+        <p sec:authorize="hasRole('POINTS_ADMIN')">你是积分管理员，能审积分、录比赛、处理申诉。</p>
+        <p sec:authorize="hasRole('CONTENT_ADMIN')">你是内容管理员，能审文章、审评论、审图片。</p>
+        <p sec:authorize="hasRole('PR_ADMIN')">你是宣传管理员，能发公告、管首页。</p>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
