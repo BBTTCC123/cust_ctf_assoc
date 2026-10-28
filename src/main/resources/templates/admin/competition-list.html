@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('比赛与奖项')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <div class="row-between">
+            <h1>比赛档案</h1>
+            <a class="btn" th:href="@{/admin/competitions/new}">新增比赛</a>
+        </div>
+        <p th:if="${message}" class="ok" th:text="${message}">已保存</p>
+        <p th:if="${#lists.isEmpty(competitions)}" class="lead">还没有记录。先录一场比赛试试。</p>
+        <table class="table" th:unless="${#lists.isEmpty(competitions)}">
+            <thead>
+            <tr><th>名称</th><th>主办方</th><th>级别</th><th>类别</th><th>时间</th><th>赛季</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${competitions}">
+                <td th:text="${c.name}">比赛</td>
+                <td th:text="${c.organizer}">主办</td>
+                <td th:text="${c.level}">LEVEL</td>
+                <td th:text="${c.category}">CATEGORY</td>
+                <td th:text="${#temporals.format(c.startDate,'yyyy-MM-dd')} + ' ~ ' + ${#temporals.format(c.endDate,'yyyy-MM-dd')}">日期</td>
+                <td th:text="${c.seasonYear}">2026</td>
+                <td class="actions">
+                    <a th:href="@{/admin/competitions/{id}/edit(id=${c.id})}">编辑</a>
+                    <form th:action="@{/admin/competitions/{id}/delete(id=${c.id})}" method="post" class="inline-form">
+                        <button type="submit" class="link-btn danger" onclick="return confirm('删除后不可恢复，确定？')">删除</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

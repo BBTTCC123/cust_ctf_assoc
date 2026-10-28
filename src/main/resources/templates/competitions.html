@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('竞赛档案')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1>竞赛档案</h1>
+    <p class="lead">协会打过的每一场比赛，都记在这里。</p>
+    <p th:if="${#lists.isEmpty(competitions)}" class="lead">还没有公开的记录。</p>
+    <table class="table" th:unless="${#lists.isEmpty(competitions)}">
+        <thead><tr><th>比赛</th><th>级别</th><th>类别</th><th>时间</th></tr></thead>
+        <tbody>
+        <tr th:each="c : ${competitions}">
+            <td th:text="${c.name}">比赛</td>
+            <td th:text="${c.level}">LEVEL</td>
+            <td th:text="${c.category}">CATEGORY</td>
+            <td th:text="${#temporals.format(c.startDate,'yyyy-MM-dd')}">日期</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

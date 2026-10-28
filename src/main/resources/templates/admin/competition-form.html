@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('比赛')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1 th:text="${editing} ? '编辑比赛' : '新增比赛'">新增比赛</h1>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}">出错了</p>
+        <form th:action="@{/admin/competitions}" method="post" th:object="${form}" class="form-grid">
+            <input type="hidden" name="id" th:if="${editing}" th:value="${id}">
+            <label>比赛名称
+                <input type="text" th:field="*{name}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+            </label>
+            <label>主办方
+                <input type="text" th:field="*{organizer}" required>
+                <span class="field-error" th:if="${#fields.hasErrors('organizer')}" th:errors="*{organizer}"></span>
+            </label>
+            <label>级别
+                <select th:field="*{level}">
+                    <option value="">请选择</option>
+                    <option th:each="lv : ${levels}" th:value="${lv.name()}" th:text="${lv.label}">LEVEL</option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('level')}" th:errors="*{level}"></span>
+            </label>
+            <label>类别
+                <select th:field="*{category}">
+                    <option value="">请选择</option>
+                    <option th:each="ct : ${categories}" th:value="${ct.name()}" th:text="${ct.label}">CATEGORY</option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></span>
+            </label>
+            <label>开始日期
+                <input type="date" th:field="*{startDate}" required>
+            </label>
+            <label>结束日期
+                <input type="date" th:field="*{endDate}" required>
+            </label>
+            <label>赛季年份
+                <input type="number" th:field="*{seasonYear}" min="2000" max="2100" required>
+            </label>
+            <div class="form-actions">
+                <button type="submit" class="btn">保存</button>
+                <a th:href="@{/admin/competitions}">取消</a>
+            </div>
+        </form>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

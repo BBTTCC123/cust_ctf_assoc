@@ -21,7 +21,7 @@ public class SecurityConfig {
         http
             .userDetailsService(userDetailsService)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/about", "/css/**", "/js/**", "/images/**", "/login", "/error").permitAll()
+                .requestMatchers("/", "/about", "/competitions", "/css/**", "/js/**", "/images/**", "/login", "/error").permitAll()
                 .requestMatchers("/admin/**").hasAnyRole("SUPER_ADMIN", "CONTENT_ADMIN", "POINTS_ADMIN", "PR_ADMIN")
                 .anyRequest().authenticated()
             )
