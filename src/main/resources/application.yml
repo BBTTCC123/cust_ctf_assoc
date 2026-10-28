@@ -23,6 +23,10 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: false
 
+app:
+  storage:
+    root: ${STORAGE_ROOT:D:/spring_study/uploads}
+
 logging:
   level:
     root: INFO
