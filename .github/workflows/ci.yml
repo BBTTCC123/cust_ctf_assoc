@@ -32,7 +32,7 @@ jobs:
         run: mvn -B -ntp package
 
       - name: Upload JAR artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: application-jars
           path: target/*.jar
