@@ -25,6 +25,7 @@
                 <td th:text="${#temporals.format(c.startDate,'yyyy-MM-dd')} + ' ~ ' + ${#temporals.format(c.endDate,'yyyy-MM-dd')}">日期</td>
                 <td th:text="${c.seasonYear}">2026</td>
                 <td class="actions">
+                    <a th:href="@{/admin/competitions/{id}/awards(id=${c.id})}">奖项</a>
                     <a th:href="@{/admin/competitions/{id}/edit(id=${c.id})}">编辑</a>
                     <form th:action="@{/admin/competitions/{id}/delete(id=${c.id})}" method="post" class="inline-form">
                         <button type="submit" class="link-btn danger" onclick="return confirm('删除后不可恢复，确定？')">删除</button>

@@ -37,3 +37,10 @@ h1 { font-size: 2rem; margin: 0 0 12px; }
 .form-grid input, .form-grid select { padding: 9px 11px; border: 1px solid var(--line); border-radius: 6px; font-size: .98rem; }
 .form-actions { grid-column: 1 / -1; display: flex; gap: 14px; align-items: center; margin-top: 6px; }
 .field-error { color: #b91c1c; font-size: .85rem; }
+.crumb { color: var(--muted); font-size: .9rem; }
+.crumb a { color: var(--accent); text-decoration: none; }
+.inline-grid { display: flex; gap: 10px; align-items: center; margin: 12px 0 26px; flex-wrap: wrap; }
+.inline-grid select, .inline-grid input, .share-row select, .share-row input { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; }
+.share-row { display: flex; gap: 10px; margin-bottom: 8px; }
+.team-block { border-left: 3px solid var(--line); padding-left: 14px; margin: 12px 0; }
+.hint { color: var(--muted); font-size: .9rem; }

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('奖项')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <p class="crumb"><a th:href="@{/admin/competitions}">比赛档案</a> / <span th:text="${competition.name}">比赛</span></p>
+        <h1 th:text="${competition.name} + ' · 奖项'">奖项</h1>
+        <p class="lead" th:text="'级别 ' + ${competition.level} + ' · ' + ${competition.category} + ' · 赛季 ' + ${competition.seasonYear}">信息</p>
+
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+        <h2>个人奖</h2>
+        <table class="table" th:unless="${#lists.isEmpty(individual)}">
+            <thead><tr><th>成员</th><th>名次</th><th>分数</th><th>佐证</th></tr></thead>
+            <tbody>
+            <tr th:each="a : ${individual}">
+                <td th:text="${userNames.get(a.userId)} ?: ${a.userId}">成员</td>
+                <td th:text="${a.rankLevel}">名次</td>
+                <td th:text="${a.basePoints}">分</td>
+                <td th:text="${a.proofUrl} ?: '—'">佐证</td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${#lists.isEmpty(individual)}" class="lead">还没有个人奖。</p>
+
+        <form th:action="@{/admin/competitions/{id}/awards/individual(id=${competition.id})}" method="post" class="inline-grid">
+            <select name="userId" required>
+                <option value="">选成员</option>
+                <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.nickname}">成员</option>
+            </select>
+            <select name="rankLevel" required>
+                <option value="">名次</option>
+                <option th:each="r : ${ranks}" th:value="${r.name()}" th:text="${r.label}">名次</option>
+            </select>
+            <input type="text" name="proofUrl" placeholder="佐证链接（可空）">
+            <button type="submit" class="btn">记一笔</button>
+        </form>
+
+        <h2>团队奖</h2>
+        <p class="hint">团队奖的分数要全部分给成员，合计必须等于这个奖的总分。</p>
+        <div th:each="ta : ${teams}" class="team-block">
+            <p>
+                <strong th:text="${ta.rankLevel}">名次</strong>
+                <span th:text="'总分 ' + ${ta.basePoints}">分</span>
+            </p>
+            <ul>
+                <li th:each="s : ${sharesByTeam.get(ta.id)}"
+                    th:text="(${userNames.get(s.userId)} ?: ${s.userId}) + '：' + ${s.points} + ' 分'">成员</li>
+            </ul>
+        </div>
+
+        <form th:action="@{/admin/competitions/{id}/awards/team(id=${competition.id})}" method="post" class="team-form">
+            <div class="inline-grid">
+                <select name="rankLevel" required>
+                    <option value="">名次</option>
+                    <option th:each="r : ${ranks}" th:value="${r.name()}" th:text="${r.label}">名次</option>
+                </select>
+                <input type="text" name="proofUrl" placeholder="佐证链接（可空）">
+            </div>
+            <div class="share-row" th:each="i : ${#numbers.sequence(1,4)}">
+                <select th:name="'user' + ${i}">
+                    <option value="">（空）</option>
+                    <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.nickname}">成员</option>
+                </select>
+                <input type="number" min="0" th:name="'points' + ${i}" placeholder="分数">
+            </div>
+            <button type="submit" class="btn">记录团队奖</button>
+        </form>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
