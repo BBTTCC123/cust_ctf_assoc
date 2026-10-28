@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('登录')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container" style="max-width: 420px;">
+    <h1>登录</h1>
+    <p class="lead">站内文章、积分明细、内部资料需要登录后才能看。</p>
+    <p th:if="${param.error}" style="color:#b91c1c;">账号或密码不对</p>
+    <p th:if="${param.logout}" style="color:#15803d;">已经退出登录</p>
+    <form method="post" th:action="@{/login}" class="login-form">
+        <label>账号
+            <input type="text" name="username" required autofocus>
+        </label>
+        <label>密码
+            <input type="password" name="password" required>
+        </label>
+        <button type="submit">登录</button>
+    </form>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
