@@ -72,3 +72,6 @@ h2 { font-size: 1.15rem; margin-bottom: 6px; }
 .top3 li { margin: 6px 0; display: flex; gap: 12px; }
 .role-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .role-chip { display: inline-flex; gap: 4px; align-items: center; font-size: .85rem; color: var(--muted); }
+.actions-inline { display: inline-flex; gap: 10px; }
+.err-list { color: #b91c1c; font-size: .9rem; }
+.import-result { margin-top: 18px; }

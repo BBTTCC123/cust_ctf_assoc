@@ -8,7 +8,7 @@
     <main class="admin-main">
         <div class="row-between">
             <h1>比赛档案</h1>
-            <a class="btn" th:href="@{/admin/competitions/new}">新增比赛</a>
+            <span class="actions-inline"><a class="btn ghost" th:href="@{/admin/competitions/import}">批量导入</a><a class="btn" th:href="@{/admin/competitions/new}">新增比赛</a></span>
         </div>
         <p th:if="${message}" class="ok" th:text="${message}">已保存</p>
         <p th:if="${#lists.isEmpty(competitions)}" class="lead">还没有记录。先录一场比赛试试。</p>

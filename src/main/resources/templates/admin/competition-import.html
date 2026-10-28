@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('导入比赛')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <p class="crumb"><a th:href="@{/admin/competitions}">比赛档案</a> / 批量导入</p>
+        <h1>批量导入比赛</h1>
+        <p class="lead">适合把过去几年的成绩一次性录进来。逐行校验，坏行只报错，不影响其它行。</p>
+
+        <p><a class="btn ghost" th:href="@{/admin/competitions/import/template}">下载 CSV 模板</a></p>
+
+        <form th:action="@{/admin/competitions/import}" method="post" enctype="multipart/form-data" class="inline-grid">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit" class="btn">开始导入</button>
+        </form>
+
+        <div th:if="${result}" class="import-result">
+            <p class="ok" th:text="'成功导入 ' + ${result.created} + ' 条，跳过重复 ' + ${result.skipped} + ' 条'">结果</p>
+            <div th:if="${not #lists.isEmpty(result.errors)}">
+                <p class="err">有 <span th:text="${#lists.size(result.errors)}">0</span> 行没导进去：</p>
+                <ul class="err-list">
+                    <li th:each="e : ${result.errors}" th:text="${e}">错误</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>格式说明</h2>
+        <pre class="hint">名称,主办方,级别,类别,开始日期,结束日期,赛季
+2025 吉林省大学生网络安全竞赛,吉林省教育厅,省级,Web,2025-05-10,2025-05-12,2025</pre>
+        <ul class="hint">
+            <li>级别只能填：省级 / 国赛 / 国际赛 / 校级</li>
+            <li>类别只能填：Web / Pwn / Reverse / Crypto / Misc / 应急响应</li>
+            <li>日期用 2025-05-10 这种格式；同名同赛季的记录会自动跳过</li>
+            <li>文件请存成 UTF-8 编码，否则中文会乱码</li>
+        </ul>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
