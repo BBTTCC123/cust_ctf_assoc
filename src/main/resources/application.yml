@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: cust-ctf-assoc
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    root: INFO
+    cn.edu.cust.assoc: DEBUG

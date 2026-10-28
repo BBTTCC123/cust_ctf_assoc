@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · 网络攻防协会'">网络攻防协会</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header th:fragment="nav" class="site-header">
+    <a class="brand" th:href="@{/}">网络攻防协会</a>
+    <nav>
+        <a th:href="@{/}">首页</a>
+        <a th:href="@{/about}">关于</a>
+    </nav>
+</header>
+<footer th:fragment="footer" class="site-footer">
+    <p>© 2026 网络攻防协会 · 仅供学习交流，禁止用于未授权测试</p>
+</footer>
+</body>
+</html>

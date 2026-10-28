@@ -1,0 +1,11 @@
+:root { --ink: #1f2933; --muted: #616e7c; --line: #e4e7eb; --accent: #2563eb; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; color: var(--ink); line-height: 1.7; }
+.site-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--line); }
+.brand { font-weight: 700; text-decoration: none; color: var(--ink); }
+.site-header nav a { margin-left: 18px; text-decoration: none; color: var(--muted); }
+.site-header nav a:hover { color: var(--accent); }
+.container { max-width: 880px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 2rem; margin: 0 0 12px; }
+.lead { color: var(--muted); font-size: 1.05rem; }
+.site-footer { border-top: 1px solid var(--line); padding: 18px 24px; color: var(--muted); font-size: .9rem; text-align: center; }

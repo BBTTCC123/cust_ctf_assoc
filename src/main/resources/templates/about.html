@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('关于')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1>关于</h1>
+    <p class="lead">这一页用来验证公共片段：页头和页脚跟首页是同一套。</p>
+    <p><a th:href="@{/}">回首页</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

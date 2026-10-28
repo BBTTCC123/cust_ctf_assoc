@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('首页')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <h1 th:text="${greeting}">网络攻防协会</h1>
+    <p class="lead">考试成绩、漏洞战果、技术文章，都留在这里。</p>
+    <p><a th:href="@{/about}">看看这个站是干什么的</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
