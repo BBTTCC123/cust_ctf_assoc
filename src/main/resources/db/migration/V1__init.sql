@@ -73,8 +73,10 @@ CREATE TABLE `team_member` (
   KEY `idx_team_member_team` (`team_id`),
   KEY `idx_team_member_user` (`user_id`),
   CONSTRAINT `uk_team_member_active` UNIQUE (`active_key`),
-  CONSTRAINT `fk_team_member_team` FOREIGN KEY (`team_id`) REFERENCES `team`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_team_member_user` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE
+  -- 这里不能用 ON DELETE CASCADE：MySQL 8 在带 STORED 生成列的表上建 CASCADE 外键会报 1215（已实测复现）。
+  -- 成员退队本来就靠 left_at 软退队，不需要级联删。
+  CONSTRAINT `fk_team_member_team` FOREIGN KEY (`team_id`) REFERENCES `team`(`id`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_team_member_user` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='战队成员与在队历史';
 
 CREATE TABLE `registration_invite` (
