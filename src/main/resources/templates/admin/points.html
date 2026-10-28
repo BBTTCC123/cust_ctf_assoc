@@ -7,7 +7,7 @@
     <aside th:replace="~{admin/layout :: sidebar}"></aside>
     <main class="admin-main">
         <h1>积分审核</h1>
-        <p class="lead">申请通过才会生成流水；流水只增不改，要撤销就再记一条负数。</p>
+        <p class="lead">申请通过才会生成流水；流水只增不改，要撤销就再记一条负数。规则按发生日期选版本。</p>
         <p th:if="${message}" class="ok" th:text="${message}"></p>
         <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
 
@@ -15,7 +15,7 @@
         <form th:action="@{/admin/points/bounty}" method="post" class="inline-grid">
             <select name="userId" required>
                 <option value="">选成员</option>
-                <option th:each="u : ${userNames}" th:value="${u.key}" th:text="${u.value}">成员</option>
+                <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.nickname}">成员</option>
             </select>
             <select name="level" required>
                 <option th:each="l : ${levels}" th:value="${l.name()}" th:text="${l.label}">等级</option>
@@ -23,27 +23,63 @@
             <select name="scene" required>
                 <option th:each="s : ${scenes}" th:value="${s.name()}" th:text="${s.label}">场景</option>
             </select>
-            <input type="text" name="target" placeholder="目标（域名或系统名）" required>
+            <input type="text" name="target" placeholder="目标（域名或系统名）" required maxlength="200">
+            <input type="text" name="platform" placeholder="漏洞平台（EDUSRC 等）" required maxlength="32">
+            <input type="text" name="externalId" placeholder="平台编号" required maxlength="64">
             <input type="date" name="occurredOn" required>
-            <input type="text" name="proofUrl" placeholder="佐证链接" required>
+            <input type="text" name="proofUrl" placeholder="佐证链接" required maxlength="500">
             <button type="submit" class="btn">提交申请</button>
         </form>
+        <p class="hint">同一平台编号的漏洞会归到同一个漏洞点，累计封顶 10 分。</p>
+
+        <h2>登记护网成绩</h2>
+        <form th:action="@{/admin/points/hw}" method="post" class="inline-grid">
+            <select name="userId" required>
+                <option value="">选成员</option>
+                <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.nickname}">成员</option>
+            </select>
+            <input type="number" name="score" min="0" step="1" placeholder="护网得分" required>
+            <input type="date" name="occurredOn" required>
+            <input type="text" name="proofUrl" placeholder="佐证链接" required maxlength="500">
+            <button type="submit" class="btn">提交申请</button>
+        </form>
+        <p class="hint">折算规则：1000 以下 0 分；1000-4999 为 3 分；5000 起 5 分，每多 1000 加 1 分；10000 起 10 分，每多 5000 加 2 分，封顶 20。</p>
 
         <h2>待审（<span th:text="${#lists.size(pending)}">0</span>）</h2>
         <table class="table" th:unless="${#lists.isEmpty(pending)}">
-            <thead><tr><th>id</th><th>成员</th><th>目标</th><th>分数</th><th>发生日</th><th></th></tr></thead>
+            <thead>
+            <tr><th>id</th><th>成员</th><th>来源</th><th>目标</th><th>等级/场景</th><th>分数</th>
+                <th>发生日</th><th>佐证</th><th>提交人</th><th>重复</th><th></th></tr>
+            </thead>
             <tbody>
             <tr th:each="r : ${pending}">
-                <td th:text="${r.id}">1</td>
-                <td th:text="${userNames.get(r.userId)}">成员</td>
-                <td th:text="${r.target}">目标</td>
-                <td th:text="${r.points}">0</td>
-                <td th:text="${r.occurredOn}">日期</td>
+                <td th:text="${r.id()}">1</td>
+                <td th:text="${r.userName()}">成员</td>
+                <td th:text="${r.sourceType() == 'BOUNTY' ? '挖洞' : (r.sourceType() == 'HW' ? '护网' : '比赛')}">来源</td>
+                <td th:text="${r.target()}">目标</td>
+                <td>
+                    <span th:if="${r.level() != null}" th:text="${r.level()}">等级</span>
+                    <span th:if="${r.scene() != null}" th:text="' / ' + ${r.scene()}">场景</span>
+                </td>
+                <td th:text="${r.points()}">0</td>
+                <td th:text="${r.occurredOn()}">日期</td>
+                <td>
+                    <a th:if="${r.proofSafe()}" th:href="${r.proofUrl()}" target="_blank"
+                       rel="noopener noreferrer">查看</a>
+                    <span th:unless="${r.proofSafe()}" class="err">链接不可用</span>
+                </td>
+                <td th:text="${r.submittedBy()}">提交人</td>
+                <td>
+                    <span class="tag warn" th:if="${r.duplicateTargets() > 1}"
+                          th:text="'同目标 ' + ${r.duplicateTargets()} + ' 条待审'">重复</span>
+                    <span th:if="${r.duplicateTargets() <= 1}" class="hint">—</span>
+                </td>
                 <td class="actions">
-                    <form th:action="@{/admin/points/{id}/approve(id=${r.id})}" method="post" class="inline-form">
+                    <form th:action="@{/admin/points/{id}/approve(id=${r.id()})}" method="post" class="inline-form">
                         <button type="submit" class="link-btn">通过</button>
                     </form>
-                    <form th:action="@{/admin/points/{id}/reject(id=${r.id})}" method="post" class="inline-form">
+                    <form th:action="@{/admin/points/{id}/reject(id=${r.id()})}" method="post" class="inline-form">
+                        <input type="text" name="reason" placeholder="驳回原因" maxlength="500">
                         <button type="submit" class="link-btn danger">驳回</button>
                     </form>
                 </td>
@@ -51,6 +87,52 @@
             </tbody>
         </table>
         <p th:if="${#lists.isEmpty(pending)}" class="lead">没有待审的申请。</p>
+
+        <h2>全部申请</h2>
+        <details>
+            <summary class="hint">展开查看（<span th:text="${#lists.size(all)}">0</span> 条）</summary>
+            <table class="table">
+                <thead><tr><th>id</th><th>成员</th><th>来源</th><th>目标</th><th>分数</th><th>发生日</th><th>状态</th></tr></thead>
+                <tbody>
+                <tr th:each="r : ${all}">
+                    <td th:text="${r.id()}">1</td>
+                    <td th:text="${r.userName()}">成员</td>
+                    <td th:text="${r.sourceType() == 'BOUNTY' ? '挖洞' : (r.sourceType() == 'HW' ? '护网' : '比赛')}">来源</td>
+                    <td th:text="${r.target()}">目标</td>
+                    <td th:text="${r.points()}">0</td>
+                    <td th:text="${r.occurredOn()}">日期</td>
+                    <td th:text="${r.state()}">PENDING</td>
+                </tr>
+                </tbody>
+            </table>
+        </details>
+
+        <h2>积分规则</h2>
+        <p class="hint">新规则从生效日起只影响新申请；已经入账的流水不会被重算。</p>
+        <form th:action="@{/admin/points/rules}" method="post" class="inline-grid">
+            <select name="direction" required>
+                <option value="BOUNTY">挖洞</option>
+                <option value="COMPETITION">比赛</option>
+                <option value="HW">护网</option>
+            </select>
+            <input type="text" name="itemKey" placeholder="规则项（如 HIGH / PROVINCE_FIRST / HW_5000）" required maxlength="64">
+            <input type="number" name="points" min="0" placeholder="分值" required>
+            <input type="date" name="effectiveFrom" required>
+            <button type="submit" class="btn">发布新版本</button>
+        </form>
+        <table class="table">
+            <thead><tr><th>方向</th><th>规则项</th><th>版本</th><th>分值</th><th>生效日</th><th>发布时间</th></tr></thead>
+            <tbody>
+            <tr th:each="rule : ${rules}">
+                <td th:text="${rule.direction()}">BOUNTY</td>
+                <td th:text="${rule.itemKey()}">HIGH</td>
+                <td th:text="${rule.version()}">1</td>
+                <td th:text="${rule.points()}">0</td>
+                <td th:text="${rule.effectiveFrom()}">2026-01-01</td>
+                <td th:text="${rule.publishedAt()}">2026-01-01</td>
+            </tr>
+            </tbody>
+        </table>
     </main>
 </div>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

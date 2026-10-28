@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('审计日志')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>审计日志</h1>
+        <p class="lead">只读。记录操作人、动作、对象、前后值、IP 和 requestId。</p>
+        <form method="get" th:action="@{/admin/audit}" class="inline-grid">
+            <input type="text" name="operator" placeholder="操作人" th:value="${operator}" maxlength="64">
+            <input type="text" name="action" placeholder="动作（如 ROLE_CHANGE）" th:value="${action}" maxlength="64">
+            <input type="text" name="targetType" placeholder="对象类型（如 USER）" th:value="${targetType}" maxlength="32">
+            <label class="hint">从 <input type="date" name="from" th:value="${from}"></label>
+            <label class="hint">到 <input type="date" name="to" th:value="${to}"></label>
+            <button type="submit" class="btn">查询</button>
+        </form>
+
+        <p th:if="${logs.totalElements == 0}" class="lead">没有记录。</p>
+        <table class="table" th:unless="${logs.totalElements == 0}">
+            <thead>
+            <tr><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>前</th><th>后</th><th>IP</th><th>requestId</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="log : ${logs.content}">
+                <td th:text="${#temporals.format(log.createdAt(),'yyyy-MM-dd HH:mm:ss')}">时间</td>
+                <td th:text="${log.operatorName()} ?: '—'">操作人</td>
+                <td th:text="${log.action()}">动作</td>
+                <td th:text="${log.targetType() != null ? log.targetType() + ' #' + log.targetId() : '—'}">对象</td>
+                <td th:text="${log.detailBefore()} ?: '—'">前</td>
+                <td th:text="${log.detailAfter()} ?: '—'">后</td>
+                <td th:text="${log.ip()} ?: '—'">IP</td>
+                <td th:text="${log.requestId()} ?: '—'">requestId</td>
+            </tr>
+            </tbody>
+        </table>
+        <nav class="pager" th:if="${logs.totalPages > 1}">
+            <a th:if="${logs.hasPrevious()}"
+               th:href="@{/admin/audit(operator=${operator},action=${action},targetType=${targetType},from=${from},to=${to},page=${logs.number - 1})}">上一页</a>
+            <span th:text="${logs.number + 1} + ' / ' + ${logs.totalPages}">1 / 1</span>
+            <a th:if="${logs.hasNext()}"
+               th:href="@{/admin/audit(operator=${operator},action=${action},targetType=${targetType},from=${from},to=${to},page=${logs.number + 1})}">下一页</a>
+        </nav>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

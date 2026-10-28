@@ -26,6 +26,12 @@ public class RecruitApplicationEntity {
     private Short seasonYear;
     @Column(nullable = false, length = 16)
     private String state;
+    @Column(length = 500)
+    private String note;
+    @Column(name = "handled_by")
+    private Long handledBy;
+    @Column(name = "handled_at")
+    private LocalDateTime handledAt;
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -46,5 +52,11 @@ public class RecruitApplicationEntity {
     public void setSeasonYear(Short seasonYear) { this.seasonYear = seasonYear; }
     public String getState() { return state; }
     public void setState(String state) { this.state = state; }
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
+    public Long getHandledBy() { return handledBy; }
+    public void setHandledBy(Long handledBy) { this.handledBy = handledBy; }
+    public LocalDateTime getHandledAt() { return handledAt; }
+    public void setHandledAt(LocalDateTime handledAt) { this.handledAt = handledAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }

@@ -28,6 +28,9 @@ public class PointsRequestEntity {
     @Column(length = 16)
     private String scene;
 
+    @Column(length = 16)
+    private String level;
+
     @Column(length = 200)
     private String target;
 
@@ -69,6 +72,8 @@ public class PointsRequestEntity {
     public void setVulnerabilityId(Long vulnerabilityId) { this.vulnerabilityId = vulnerabilityId; }
     public String getScene() { return scene; }
     public void setScene(String scene) { this.scene = scene; }
+    public String getLevel() { return level; }
+    public void setLevel(String level) { this.level = level; }
     public String getTarget() { return target; }
     public void setTarget(String target) { this.target = target; }
     public LocalDate getOccurredOn() { return occurredOn; }

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${competition.name()})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <p class="crumb"><a th:href="@{/competitions}">← 竞赛档案</a></p>
+    <h1 th:text="${competition.name()}">比赛名称</h1>
+    <p class="lead" th:text="${competition.levelLabel()} + ' · ' + ${competition.categoryLabel()} + ' · ' + ${competition.seasonYear()} + ' 赛季'">信息</p>
+    <p class="muted"
+       th:text="${competition.organizer()} + ' · ' + ${#temporals.format(competition.startDate(),'yyyy-MM-dd')} + ' ~ ' + ${#temporals.format(competition.endDate(),'yyyy-MM-dd')}">主办方 · 日期</p>
+
+    <section>
+        <h2>现场照片</h2>
+        <p th:if="${#lists.isEmpty(competition.photoIds())}" class="lead">暂无照片。</p>
+        <div class="photo-grid" th:unless="${#lists.isEmpty(competition.photoIds())}">
+            <a th:each="mediaId : ${competition.photoIds()}" th:href="@{/media/{id}(id=${mediaId})}"
+               target="_blank" rel="noopener">
+                <img th:src="@{/media/{id}(id=${mediaId})}" alt="比赛现场照片">
+            </a>
+        </div>
+    </section>
+
+    <section>
+        <h2>个人奖项</h2>
+        <p th:if="${#lists.isEmpty(competition.individual())}" class="lead">暂无个人奖项。</p>
+        <table class="table" th:unless="${#lists.isEmpty(competition.individual())}">
+            <thead><tr><th>成员</th><th>名次</th><th>积分</th></tr></thead>
+            <tbody>
+            <tr th:each="a : ${competition.individual()}">
+                <td th:text="${a.nickname()}">成员</td>
+                <td th:text="${a.rankLabel()}">名次</td>
+                <td th:text="${a.points()}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>团队奖项</h2>
+        <p th:if="${#lists.isEmpty(competition.teams())}" class="lead">暂无团队奖项。</p>
+        <div class="team-block" th:each="team : ${competition.teams()}">
+            <p><strong th:text="${team.rankLabel()}">名次</strong>
+                <span th:text="'总分 ' + ${team.basePoints()}">分</span></p>
+            <ul>
+                <li th:each="s : ${team.shares()}" th:text="${s.nickname()} + '：' + ${s.points()} + ' 分'">成员</li>
+            </ul>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

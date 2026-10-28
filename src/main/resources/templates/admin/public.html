@@ -12,33 +12,92 @@
 
         <h2>发公告</h2>
         <form th:action="@{/admin/public/announcement}" method="post" class="form-grid single">
-            <label>标题<input type="text" name="title" required></label>
+            <label>标题<input type="text" name="title" required maxlength="200"></label>
             <label>正文（Markdown）<textarea name="contentMd" rows="6" required></textarea></label>
+            <label>附件媒体 ID（可选，需先审核通过）<input type="number" name="attachmentMediaId" min="1"></label>
             <label class="inline-check"><input type="checkbox" name="pinned" value="true"> 置顶</label>
             <div class="form-actions"><button type="submit" class="btn">发布</button></div>
         </form>
 
+        <h2>公告列表</h2>
+        <table class="table">
+            <thead><tr><th>标题</th><th>发布时间</th><th>状态</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="a : ${announcements}">
+                <td><a th:href="@{/announcements/{id}(id=${a.id})}" target="_blank" th:text="${a.title}">标题</a></td>
+                <td th:text="${#temporals.format(a.publishedAt,'yyyy-MM-dd HH:mm')}">时间</td>
+                <td th:text="${a.deletedAt != null} ? '已下架' : '已发布'">已发布</td>
+                <td>
+                    <form th:if="${a.deletedAt == null}" th:action="@{/admin/public/announcement/{id}/takedown(id=${a.id})}"
+                          method="post" class="inline-form" data-confirm="下架后前台立即不可见，确定？">
+                        <button type="submit" class="link-btn danger">下架</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
         <h2>加一条荣誉</h2>
         <form th:action="@{/admin/public/honor}" method="post" class="inline-grid">
-            <input type="text" name="title" placeholder="荣誉名称" required>
+            <input type="text" name="title" placeholder="荣誉名称" required maxlength="200">
             <input type="number" name="year" placeholder="年份" min="2000" max="2100" required>
-            <input type="text" name="description" placeholder="说明（可空）">
+            <input type="text" name="description" placeholder="说明（可空）" maxlength="500">
+            <input type="number" name="sortOrder" placeholder="排序（可空）">
             <button type="submit" class="btn">添加</button>
         </form>
 
+        <table class="table">
+            <thead><tr><th>年份</th><th>荣誉</th><th>状态</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="h : ${honors}">
+                <td th:text="${h.year}">2025</td>
+                <td th:text="${h.title}">荣誉</td>
+                <td th:text="${h.deletedAt != null} ? '已下架' : '展示中'">展示中</td>
+                <td>
+                    <form th:if="${h.deletedAt == null}" th:action="@{/admin/public/honor/{id}/takedown(id=${h.id})}"
+                          method="post" class="inline-form" data-confirm="下架后前台立即不可见，确定？">
+                        <button type="submit" class="link-btn danger">下架</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
         <h2>招新报名（<span th:text="${#lists.size(recruits)}">0</span>）</h2>
         <table class="table" th:unless="${#lists.isEmpty(recruits)}">
-            <thead><tr><th>姓名</th><th>学号</th><th>学院</th><th>联系方式</th><th>时间</th></tr></thead>
+            <thead>
+            <tr><th>姓名</th><th>学号</th><th>学院/专业</th><th>联系方式</th><th>留言</th>
+                <th>状态</th><th>处理人/备注</th><th>操作</th></tr>
+            </thead>
             <tbody>
             <tr th:each="r : ${recruits}">
                 <td th:text="${r.name}">姓名</td>
                 <td th:text="${r.studentNo}">学号</td>
-                <td th:text="${r.college}">学院</td>
+                <td th:text="${r.college} + ' / ' + ${r.major}">学院</td>
                 <td th:text="${r.contact}">联系方式</td>
-                <td th:text="${#temporals.format(r.createdAt,'yyyy-MM-dd HH:mm')}">时间</td>
+                <td th:text="${r.message} ?: '—'">留言</td>
+                <td th:text="${r.state}">NEW</td>
+                <td>
+                    <span th:if="${r.handledBy != null}"
+                          th:text="${handlerNames.get(r.handledBy)} ?: '管理员'">管理员</span>
+                    <span th:if="${r.note}" th:text="${r.note}">备注</span>
+                    <span th:unless="${r.note}" class="hint">—</span>
+                </td>
+                <td class="actions">
+                    <form th:if="${r.state == 'NEW' or r.state == 'CONTACTED'}"
+                          th:action="@{/admin/public/recruit/{id}/state(id=${r.id})}" method="post" class="inline-form">
+                        <input type="text" name="note" placeholder="备注" maxlength="500">
+                        <button type="submit" name="targetState" value="CONTACTED" class="link-btn"
+                                th:if="${r.state == 'NEW'}">已联系</button>
+                        <button type="submit" name="targetState" value="ACCEPTED" class="link-btn"
+                                th:if="${r.state == 'CONTACTED'}">录取</button>
+                        <button type="submit" name="targetState" value="REJECTED" class="link-btn danger">拒绝</button>
+                    </form>
+                </td>
             </tr>
             </tbody>
         </table>
+        <p th:if="${#lists.isEmpty(recruits)}" class="lead">还没有报名。</p>
     </main>
 </div>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

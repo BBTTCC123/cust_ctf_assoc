@@ -1,5 +1,7 @@
 package cn.edu.cust.assoc.config;
 
+import cn.edu.cust.assoc.common.BizException;
+import cn.edu.cust.assoc.common.PasswordPolicy;
 import cn.edu.cust.assoc.domain.RoleEntity;
 import cn.edu.cust.assoc.domain.UserEntity;
 import cn.edu.cust.assoc.repository.RoleRepository;
@@ -12,13 +14,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * 首次启动时确保存在一个超管账号。密码从环境变量 ADMIN_PASSWORD 读。
+ * 首次启动时确保存在一个超管账号。密码只从环境变量 ADMIN_PASSWORD 读。
+ *
+ * 没有密码、用默认口令或弱口令一律启动失败 —— 宁可不启动，也不让一个已知密码的
+ * 超管账号暴露在公网上。新超管首次登录会被强制改密。
  */
 @Configuration
 public class DataInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
-    private static final String DEFAULT_ADMIN_PASSWORD = "ChangeMe#2026";
 
     @Bean
     public ApplicationRunner initSuperAdmin(UserRepository userRepository,
@@ -29,9 +33,15 @@ public class DataInitializer {
             if (userRepository.existsByUsername(username)) {
                 return;
             }
-            String raw = System.getenv().getOrDefault("ADMIN_PASSWORD", DEFAULT_ADMIN_PASSWORD);
-            if (DEFAULT_ADMIN_PASSWORD.equals(raw)) {
-                log.warn("未设置 ADMIN_PASSWORD，超管使用默认密码，登录后请立刻修改");
+            String raw = System.getenv("ADMIN_PASSWORD");
+            if (raw == null || raw.isBlank()) {
+                throw new IllegalStateException(
+                        "首次启动必须设置 ADMIN_PASSWORD（至少 12 位，含大小写/数字/符号中的三类）");
+            }
+            try {
+                PasswordPolicy.validate(raw);
+            } catch (BizException e) {
+                throw new IllegalStateException("ADMIN_PASSWORD 不符合安全要求：" + e.getMessage(), e);
             }
             // 角色由 Flyway 种子数据写入，这里必须从库里取，不能 new 一个（否则会插重复 code）
             RoleEntity superAdmin = roleRepository.findByCode("SUPER_ADMIN")
@@ -39,12 +49,13 @@ public class DataInitializer {
 
             UserEntity admin = new UserEntity();
             admin.setUsername(username);
-            admin.setNickname("Yorkchain");
+            admin.setNickname(username);
             admin.setPasswordHash(encoder.encode(raw));
             admin.setStatus("ACTIVE");
+            admin.setMustChangePassword(true);
             admin.getRoles().add(superAdmin);
             userRepository.save(admin);
-            log.info("已创建超管账号 {}", username);
+            log.info("已创建超管账号 {}，首次登录必须修改密码", username);
         };
     }
 }

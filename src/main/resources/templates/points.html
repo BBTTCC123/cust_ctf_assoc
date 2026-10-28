@@ -17,11 +17,12 @@
         <tbody>
         <tr th:each="r : ${rows}">
             <td th:text="${r.rank}">1</td>
-            <td th:text="${r.name}">昵称</td>
+            <td><a th:href="@{/members/{id}(id=${r.userId})}" th:text="${r.nickname}">昵称</a></td>
             <td th:text="${r.total}">0</td>
         </tr>
         </tbody>
     </table>
+    <p class="hint">点击成员昵称可以查看积分构成；内部佐证不对外公开。</p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

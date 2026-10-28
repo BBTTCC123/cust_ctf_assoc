@@ -55,6 +55,17 @@ class TeamShareRulesTest {
     }
 
     @Test
+    @DisplayName("重复成员显式拒绝")
+    void duplicateMember() {
+        assertThatThrownBy(() -> TeamShareRules.validateNoDuplicate(java.util.List.of(1L, 2L, 1L)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("同一个成员不能出现两次");
+        org.assertj.core.api.Assertions.assertThatCode(
+                        () -> TeamShareRules.validateNoDuplicate(java.util.List.of(1L, 2L, 3L)))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
     @DisplayName("竞赛分值表：省级/国赛/国际/校级")
     void competitionPointsTable() {
         assertThat(CompetitionPoints.of("PROVINCE", "FIRST")).isEqualTo(10);

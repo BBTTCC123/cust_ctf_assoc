@@ -5,16 +5,28 @@
 <header th:replace="~{fragments/layout :: nav}"></header>
 <main class="container">
     <h1>竞赛档案</h1>
-    <p class="lead">协会打过的每一场比赛，都记在这里。</p>
+    <p class="lead">协会打过的每一场比赛，都记在这里。点进详情能看参赛成员、奖项和现场照片。</p>
+
+    <form method="get" th:action="@{/competitions}" class="search-bar">
+        <select name="season">
+            <option value="">全部赛季</option>
+            <option th:each="y : ${seasons}" th:value="${y}" th:text="${y} + ' 赛季'"
+                    th:selected="${season != null and y == season}">2025 赛季</option>
+        </select>
+        <button type="submit" class="btn">筛选</button>
+        <a th:if="${season != null}" th:href="@{/competitions}" class="hint">清空</a>
+    </form>
+
     <p th:if="${#lists.isEmpty(competitions)}" class="lead">还没有公开的记录。</p>
     <table class="table" th:unless="${#lists.isEmpty(competitions)}">
-        <thead><tr><th>比赛</th><th>级别</th><th>类别</th><th>时间</th></tr></thead>
+        <thead><tr><th>比赛</th><th>级别</th><th>类别</th><th>时间</th><th>赛季</th></tr></thead>
         <tbody>
         <tr th:each="c : ${competitions}">
-            <td th:text="${c.name}">比赛</td>
-            <td th:text="${c.level}">LEVEL</td>
-            <td th:text="${c.category}">CATEGORY</td>
-            <td th:text="${#temporals.format(c.startDate,'yyyy-MM-dd')}">日期</td>
+            <td><a th:href="@{/competitions/{id}(id=${c.id()})}" th:text="${c.name()}">比赛</a></td>
+            <td th:text="${c.levelLabel()}">级别</td>
+            <td th:text="${c.categoryLabel()}">类别</td>
+            <td th:text="${#temporals.format(c.startDate(),'yyyy-MM-dd')} + ' ~ ' + ${#temporals.format(c.endDate(),'yyyy-MM-dd')}">日期</td>
+            <td th:text="${c.seasonYear()}">2026</td>
         </tr>
         </tbody>
     </table>

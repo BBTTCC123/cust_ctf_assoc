@@ -29,6 +29,13 @@ public class LocalStorageService {
         return key;
     }
 
+    /** 审核搬移用：允许覆盖已存在的同名文件，重复点击审核不会因为目标已存在而失败。 */
+    public void writeReplace(String zone, String key, byte[] data) throws IOException {
+        Path target = resolve(zone, key);
+        Files.createDirectories(target.getParent());
+        Files.write(target, data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
     public byte[] read(String zone, String key) throws IOException {
         return Files.readAllBytes(resolve(zone, key));
     }

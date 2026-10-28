@@ -6,12 +6,27 @@ package cn.edu.cust.assoc.domain;
  * 挖洞：基础分 = 10 - 2 × 等级序号（严重 1 / 高危 2 / 中危 3 / 低危 4）→ 8/6/4/2
  * 场景系数：单洞 1，通杀 / 公益 各 1/2（两者不叠乘，只减一次）
  * 封顶：同一个漏洞点累计不超过 10 分，超出部分不记。
+ *
+ * 护网（唯一业务口径）：
+ *   1000 分以下        0 分
+ *   1000 ~ 4999        3 分
+ *   5000 ~ 9999        5 分起，每多 1000 加 1 分（5000=5 … 9999=9）
+ *   10000 起           10 分起，每多 5000 加 2 分（15000=12 …），封顶 20
+ *
+ * 这里的常量是数据库 points_rule 没有对应规则时使用的兜底值；
+ * 实际计分优先读 points_rule 的已发布版本（见 PointsRuleService）。
  */
 public final class PointCalc {
 
     private PointCalc() {}
 
     public static final int VULN_CAP = 10;
+
+    public static final int HW_BASE_1000 = 3;
+    public static final int HW_BASE_5000 = 5;
+    public static final int HW_BASE_10000 = 10;
+    public static final int HW_STEP = 2;
+    public static final int HW_CAP = 20;
 
     public enum Level {
         CRITICAL(1, "严重"), HIGH(2, "高危"), MEDIUM(3, "中危"), LOW(4, "低危");
@@ -69,12 +84,16 @@ public final class PointCalc {
         return Math.min(want, remaining);
     }
 
-    /** 护网折算：分段，1000 分以下 0 分，封顶 20。 */
+    /** 护网折算：默认规则。 */
     public static int hw(int score) {
+        return hw(score, HW_BASE_1000, HW_BASE_5000, HW_BASE_10000, HW_STEP);
+    }
+
+    /** 护网折算：规则表传入的分段参数。 */
+    public static int hw(int score, int base1000, int base5000, int base10000, int step) {
         if (score < 1000) return 0;
-        if (score < 5000) return 3;
-        if (score < 10000) return 3 + Math.round((score - 5000) / 1000f);
-        if (score < 15000) return 10;
-        return Math.min(20, 10 + 2 * ((score - 10000) / 5000));
+        if (score < 5000) return base1000;
+        if (score < 10000) return base5000 + (score - 5000) / 1000;
+        return Math.min(HW_CAP, base10000 + step * ((score - 10000) / 5000));
     }
 }

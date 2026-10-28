@@ -8,4 +8,8 @@ import java.util.List;
 public interface SensitiveWordRepository extends JpaRepository<SensitiveWordEntity, Long> {
 
     List<SensitiveWordEntity> findByEnabledTrue();
+
+    List<SensitiveWordEntity> findAllByOrderByIdAsc();
+
+    boolean existsByWordAndLevel(String word, String level);
 }

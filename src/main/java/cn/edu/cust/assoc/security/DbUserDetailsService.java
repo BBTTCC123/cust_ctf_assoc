@@ -3,7 +3,6 @@ package cn.edu.cust.assoc.security;
 import cn.edu.cust.assoc.domain.UserEntity;
 import cn.edu.cust.assoc.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,10 +28,13 @@ public class DbUserDetailsService implements UserDetailsService {
                 .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getCode()))
                 .toList();
 
-        return User.withUsername(user.getUsername())
-                .password(user.getPasswordHash())
-                .authorities(authorities)
-                .disabled(!user.isActive())
-                .build();
+        return new AssocUserDetails(
+                user.getId(),
+                user.getUsername(),
+                user.getPasswordHash(),
+                user.getNickname(),
+                user.isActive(),
+                Boolean.TRUE.equals(user.getMustChangePassword()),
+                List.copyOf(authorities));
     }
 }

@@ -30,6 +30,9 @@ public class UserEntity {
     @Column(nullable = false, length = 16)
     private String status;
 
+    @Column(name = "must_change_password", nullable = false, columnDefinition = "TINYINT(1)")
+    private Boolean mustChangePassword;
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -55,6 +58,8 @@ public class UserEntity {
     public void setAvatarPath(String avatarPath) { this.avatarPath = avatarPath; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public Boolean getMustChangePassword() { return mustChangePassword; }
+    public void setMustChangePassword(Boolean mustChangePassword) { this.mustChangePassword = mustChangePassword; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public Set<RoleEntity> getRoles() { return roles; }
 }

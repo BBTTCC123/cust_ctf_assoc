@@ -36,15 +36,26 @@ class PointCalcTest {
     }
 
     @Test
-    @DisplayName("护网分段：999 不算分，1000 起 3 分，封顶 20")
+    @DisplayName("护网分段边界：999/1000/4999/5000/9999/10000/15000")
     void hw() {
+        assertThat(PointCalc.hw(0)).isZero();
         assertThat(PointCalc.hw(999)).isZero();
         assertThat(PointCalc.hw(1000)).isEqualTo(3);
         assertThat(PointCalc.hw(4999)).isEqualTo(3);
-        assertThat(PointCalc.hw(7000)).isEqualTo(5);
+        assertThat(PointCalc.hw(5000)).isEqualTo(5);
+        assertThat(PointCalc.hw(7000)).isEqualTo(7);
+        assertThat(PointCalc.hw(9999)).isEqualTo(9);
         assertThat(PointCalc.hw(10000)).isEqualTo(10);
         assertThat(PointCalc.hw(15000)).isEqualTo(12);
         assertThat(PointCalc.hw(200000)).isEqualTo(20);
+    }
+
+    @Test
+    @DisplayName("护网折算支持规则表参数")
+    void hwWithRules() {
+        assertThat(PointCalc.hw(5000, 4, 6, 12, 3)).isEqualTo(6);
+        assertThat(PointCalc.hw(12500, 4, 6, 12, 3)).isEqualTo(12);
+        assertThat(PointCalc.hw(20000, 4, 6, 12, 3)).isEqualTo(18);
     }
 
     @Test

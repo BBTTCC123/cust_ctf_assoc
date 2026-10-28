@@ -27,8 +27,9 @@
                 <td class="actions">
                     <a th:href="@{/admin/competitions/{id}/awards(id=${c.id})}">奖项</a>
                     <a th:href="@{/admin/competitions/{id}/edit(id=${c.id})}">编辑</a>
-                    <form th:action="@{/admin/competitions/{id}/delete(id=${c.id})}" method="post" class="inline-form">
-                        <button type="submit" class="link-btn danger" onclick="return confirm('删除后不可恢复，确定？')">删除</button>
+                    <form th:action="@{/admin/competitions/{id}/delete(id=${c.id})}" method="post" class="inline-form"
+                          data-confirm="删除后不可恢复，确定？">
+                        <button type="submit" class="link-btn danger">删除</button>
                     </form>
                 </td>
             </tr>

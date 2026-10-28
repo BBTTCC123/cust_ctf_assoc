@@ -10,4 +10,6 @@ public interface AwardRepository extends JpaRepository<AwardEntity, Long> {
     List<AwardEntity> findByCompetitionIdOrderByIdDesc(Long competitionId);
 
     List<AwardEntity> findByUserIdOrderByIdDesc(Long userId);
+
+    boolean existsByCompetitionIdAndUserIdAndRankLevel(Long competitionId, Long userId, String rankLevel);
 }

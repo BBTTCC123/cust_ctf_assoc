@@ -6,12 +6,22 @@
 <div class="admin-shell">
     <aside th:replace="~{admin/layout :: sidebar}"></aside>
     <main class="admin-main">
-        <h1>账号</h1>
-        <p class="lead">角色决定能进哪个后台入口；禁用后立刻登不上。</p>
+        <h1>账号与邀请</h1>
+        <p class="lead">角色决定能进哪个后台入口；禁用、改角色、重置密码都会让目标用户现有会话立即失效。</p>
         <p th:if="${message}" class="ok" th:text="${message}"></p>
         <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+        <h2>创建成员账号</h2>
+        <form th:action="@{/admin/users}" method="post" class="inline-grid">
+            <input type="text" name="username" placeholder="登录名（字母/数字/下划线）" required pattern="[A-Za-z0-9_]{4,32}">
+            <input type="text" name="nickname" placeholder="昵称" required maxlength="64">
+            <input type="password" name="password" placeholder="初始密码（至少 12 位）" required minlength="12">
+            <button type="submit" class="btn">创建（首次登录强制改密）</button>
+        </form>
+
+        <h2>成员列表</h2>
         <table class="table">
-            <thead><tr><th>账号</th><th>昵称</th><th>状态</th><th>角色</th><th></th></tr></thead>
+            <thead><tr><th>账号</th><th>昵称</th><th>状态</th><th>角色</th><th>操作</th></tr></thead>
             <tbody>
             <tr th:each="u : ${users}">
                 <td th:text="${u.username}">admin</td>
@@ -27,10 +37,41 @@
                         <button type="submit" class="link-btn">保存</button>
                     </form>
                 </td>
-                <td>
+                <td class="actions">
                     <form th:action="@{/admin/users/{id}/status(id=${u.id})}" method="post" class="inline-form">
                         <input type="hidden" name="status" th:value="${u.status == 'ACTIVE'} ? 'DISABLED' : 'ACTIVE'">
                         <button type="submit" class="link-btn" th:text="${u.status == 'ACTIVE'} ? '禁用' : '启用'">禁用</button>
+                    </form>
+                    <form th:action="@{/admin/users/{id}/reset-password(id=${u.id})}" method="post" class="inline-form"
+                          data-confirm="重置后目标用户会被强制下线并改密，确定？">
+                        <button type="submit" class="link-btn">重置密码</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2>注册邀请码</h2>
+        <form th:action="@{/admin/users/invites}" method="post" class="inline-grid">
+            <input type="number" name="maxUses" min="1" max="100" value="1" required>
+            <input type="date" name="expiresOn" required>
+            <input type="text" name="note" placeholder="备注（可空）" maxlength="200">
+            <button type="submit" class="btn">生成邀请码</button>
+        </form>
+        <p class="hint">注册页地址：/register；邀请码一次性使用，可在下方停用。</p>
+        <table class="table">
+            <thead><tr><th>邀请码</th><th>状态</th><th>使用情况</th><th>有效期至</th><th>备注</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="i : ${invites}">
+                <td th:text="${i.code}">CODE</td>
+                <td th:text="${i.status}">ACTIVE</td>
+                <td th:text="${i.usedCount} + ' / ' + ${i.maxUses}">0 / 1</td>
+                <td th:text="${#temporals.format(i.expiresAt,'yyyy-MM-dd HH:mm')}">时间</td>
+                <td th:text="${i.note} ?: '—'">备注</td>
+                <td>
+                    <form th:if="${i.status == 'ACTIVE'}"
+                          th:action="@{/admin/users/invites/{id}/revoke(id=${i.id})}" method="post" class="inline-form">
+                        <button type="submit" class="link-btn danger">停用</button>
                     </form>
                 </td>
             </tr>

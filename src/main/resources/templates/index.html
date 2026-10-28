@@ -40,8 +40,8 @@
         <p th:if="${#lists.isEmpty(topPoints)}" class="lead">还没有积分记录。</p>
         <ol class="top3">
             <li th:each="row : ${topPoints}">
-                <span th:text="'用户' + ${row[0]}">成员</span>
-                <strong th:text="${row[1]} + ' 分'">0 分</strong>
+                <a th:href="@{/members/{id}(id=${row.userId})}" th:text="${row.nickname}">成员</a>
+                <strong th:text="${row.total} + ' 分'">0 分</strong>
             </li>
         </ol>
         <p><a th:href="@{/points}">看完整积分榜</a></p>

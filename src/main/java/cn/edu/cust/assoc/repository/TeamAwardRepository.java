@@ -8,4 +8,8 @@ import java.util.List;
 public interface TeamAwardRepository extends JpaRepository<TeamAwardEntity, Long> {
 
     List<TeamAwardEntity> findByCompetitionIdOrderByIdDesc(Long competitionId);
+
+    boolean existsByCompetitionIdAndRankLevel(Long competitionId, String rankLevel);
+
+    List<TeamAwardEntity> findByCompetitionIdInOrderByIdDesc(List<Long> competitionIds);
 }

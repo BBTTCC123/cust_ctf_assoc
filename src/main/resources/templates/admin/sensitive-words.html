@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('敏感词')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>敏感词库</h1>
+        <p class="lead">BLOCK 直接拒绝发布；REVIEW 进入人工审核。词库没有缓存，改动立即生效。</p>
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+        <h2>新增</h2>
+        <form th:action="@{/admin/sensitive-words}" method="post" class="inline-grid">
+            <input type="text" name="word" placeholder="敏感词" required maxlength="64">
+            <select name="level">
+                <option value="REVIEW">REVIEW（人工审核）</option>
+                <option value="BLOCK">BLOCK（直接拒绝）</option>
+            </select>
+            <button type="submit" class="btn">添加</button>
+        </form>
+
+        <h2>批量导入</h2>
+        <form th:action="@{/admin/sensitive-words/import}" method="post" class="form-grid single">
+            <label>每行一条：词,级别（级别可省略，默认 REVIEW）
+                <textarea name="text" rows="5" placeholder="示例词,BLOCK&#10;争议词,REVIEW"></textarea>
+            </label>
+            <div class="form-actions"><button type="submit" class="btn">导入</button></div>
+        </form>
+
+        <h2>词库（<span th:text="${#lists.size(words)}">0</span>）</h2>
+        <table class="table">
+            <thead><tr><th>词</th><th>级别</th><th>启用</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="w : ${words}">
+                <td>
+                    <form th:action="@{/admin/sensitive-words/{id}/update(id=${w.id()})}" method="post" class="inline-form">
+                        <input type="text" name="word" th:value="${w.word()}" required maxlength="64">
+                        <select name="level">
+                            <option value="REVIEW" th:selected="${w.level() == 'REVIEW'}">REVIEW</option>
+                            <option value="BLOCK" th:selected="${w.level() == 'BLOCK'}">BLOCK</option>
+                        </select>
+                        <label class="role-chip">
+                            <input type="checkbox" name="enabled" value="true" th:checked="${w.enabled()}"> 启用
+                        </label>
+                        <button type="submit" class="link-btn">保存</button>
+                    </form>
+                </td>
+                <td th:text="${w.level()}">REVIEW</td>
+                <td th:text="${w.enabled()} ? '是' : '否'">是</td>
+                <td>
+                    <form th:action="@{/admin/sensitive-words/{id}/delete(id=${w.id()})}" method="post" class="inline-form"
+                          data-confirm="删除后不可恢复，确定？">
+                        <button type="submit" class="link-btn danger">删除</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

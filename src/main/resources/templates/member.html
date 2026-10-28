@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('成员积分')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <p class="crumb"><a th:href="@{/points}">← 积分榜</a></p>
+    <h1 th:text="${member.nickname()}">成员</h1>
+    <p class="lead">总分 <strong th:text="${member.total()}">0</strong> 分
+        <span class="hint">（公开页只展示分数构成，不含佐证和内部备注）</span></p>
+
+    <h2>来源汇总</h2>
+    <p th:if="${#maps.isEmpty(member.bySource())}" class="lead">还没有积分记录。</p>
+    <ul class="source-list" th:unless="${#maps.isEmpty(member.bySource())}">
+        <li th:each="entry : ${member.bySource()}">
+            <span th:text="${entry.key}">来源</span>
+            <strong th:text="${entry.value} + ' 分'">0 分</strong>
+        </li>
+    </ul>
+
+    <h2>明细</h2>
+    <p th:if="${#lists.isEmpty(member.rows())}" class="lead">还没有积分记录。</p>
+    <table class="table" th:unless="${#lists.isEmpty(member.rows())}">
+        <thead><tr><th>归属月</th><th>发生日</th><th>来源</th><th>类型</th><th>分数</th></tr></thead>
+        <tbody>
+        <tr th:each="r : ${member.rows()}">
+            <td th:text="${r.periodMonth()}">2026-10</td>
+            <td th:text="${r.occurredOn()}">日期</td>
+            <td th:text="${r.sourceType()}">来源</td>
+            <td th:text="${r.entryType() == 'REVERSAL' ? '冲抵' : '入账'}">入账</td>
+            <td th:text="${r.points()}">0</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

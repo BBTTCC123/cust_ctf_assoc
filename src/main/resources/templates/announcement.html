@@ -8,6 +8,16 @@
     <h1 th:text="${a.title}">标题</h1>
     <p class="muted" th:text="${#temporals.format(a.publishedAt,'yyyy-MM-dd HH:mm')}">时间</p>
     <div class="markdown-body" th:utext="${a.contentHtml}">正文</div>
+
+    <section th:if="${!#lists.isEmpty(attachments)}">
+        <h2>附件</h2>
+        <ul class="article-list">
+            <li th:each="f : ${attachments}">
+                <a th:href="@{/media/{id}(id=${f.mediaId()})}" target="_blank" rel="noopener"
+                   th:text="${f.originalName()}">附件</a>
+            </li>
+        </ul>
+    </section>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

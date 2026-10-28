@@ -9,10 +9,15 @@
         <h1>写一篇</h1>
         <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
         <form th:action="@{/admin/articles}" method="post" class="form-grid single">
-            <label>标题<input type="text" name="title" required></label>
-            <label>摘要<input type="text" name="summary"></label>
+            <label>标题<input type="text" name="title" required maxlength="200"></label>
+            <label>摘要<input type="text" name="summary" maxlength="500"></label>
             <label>正文（Markdown）
                 <textarea name="contentMd" rows="16" required></textarea>
+            </label>
+            <label>标签（逗号分隔，最多 8 个）<input type="text" name="tags" maxlength="300"></label>
+            <label>封面媒体 ID（可选，需先审核通过）
+                <input type="number" name="coverMediaId" min="1">
+                <span class="hint">在“媒体”页上传并审核通过后，把 id 填在这里。</span>
             </label>
             <label class="inline-check">
                 <input type="checkbox" name="involvesVuln" value="true"> 涉及漏洞点（勾了就只能站内可见）
