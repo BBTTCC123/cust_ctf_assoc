@@ -3,21 +3,43 @@
 <head th:replace="~{fragments/layout :: head('加入我们')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container" style="max-width: 640px;">
-    <h1>加入我们</h1>
-    <p class="lead">不用注册账号，填个表就行。我们会联系你。</p>
-    <p th:if="${message}" class="ok" th:text="${message}"></p>
-    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
-    <form th:action="@{/join}" method="post" class="form-grid single">
-        <label>姓名<input type="text" name="name" required maxlength="64"></label>
-        <label>学号<input type="text" name="studentNo" required pattern="\d{6,20}"
-                        title="6 到 20 位数字" inputmode="numeric"></label>
-        <label>学院<input type="text" name="college" required maxlength="128"></label>
-        <label>专业<input type="text" name="major" required maxlength="128"></label>
-        <label>联系方式（QQ / 微信 / 手机）<input type="text" name="contact" required maxlength="128"></label>
-        <label>想说的话（可选）<textarea name="message" rows="4" maxlength="1000"></textarea></label>
-        <div class="form-actions"><button type="submit" class="btn">提交报名</button></div>
-    </form>
+<main>
+    <section th:replace="~{fragments/layout :: pageHero('CUST · RECRUITMENT','加入我们','不用注册账号，填个表就行。我们会联系你，一起打下一场比赛。')}"></section>
+    <div class="container">
+        <div class="grid-2" style="align-items:start;">
+            <section class="auth-visual" style="min-height:auto;">
+                <div>
+                    <img class="brand-logo" th:src="@{/images/logo.webp}" alt="CUST 网络攻防协会会徽">
+                    <p class="eyebrow" style="color:#8fd4ff;">WHY JOIN US</p>
+                    <h1 style="font-size:clamp(1.7rem,3vw,2.4rem);margin-top:12px;">从零开始，<br>把兴趣练成战斗力。</h1>
+                    <p class="lead" style="color:#b9d6f3;">不管你是刚接触 CTF，还是已经在打比赛，这里都有一起熬夜、一起复盘的队友。</p>
+                    <ul class="auth-points">
+                        <li>参加校级、省级与全国网络安全竞赛</li>
+                        <li>系统化的积分成长与战队协作</li>
+                        <li>技术分享、靶场训练与内部资源</li>
+                    </ul>
+                </div>
+            </section>
+
+            <div class="panel auth-card" style="align-self:stretch;">
+                <p class="eyebrow">APPLICATION</p>
+                <h2>报名表</h2>
+                <p class="lead">提交后由宣传管理员联系你，请留真实可用的联系方式。</p>
+                <p th:if="${message}" class="ok" th:text="${message}"></p>
+                <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+                <form th:action="@{/join}" method="post" class="form-grid single">
+                    <label>姓名<input type="text" name="name" required maxlength="64" placeholder="你的姓名"></label>
+                    <label>学号<input type="text" name="studentNo" required pattern="\d{6,20}"
+                                    title="6 到 20 位数字" inputmode="numeric" placeholder="6-20 位数字"></label>
+                    <label>学院<input type="text" name="college" required maxlength="128" placeholder="如 计算机学院"></label>
+                    <label>专业<input type="text" name="major" required maxlength="128" placeholder="如 信息安全"></label>
+                    <label>联系方式（QQ / 微信 / 手机）<input type="text" name="contact" required maxlength="128" placeholder="方便联系到你的方式"></label>
+                    <label>想说的话（可选）<textarea name="message" rows="4" maxlength="1000" placeholder="想加入的方向、比赛经历，或者只是想说声你好……"></textarea></label>
+                    <div class="form-actions"><button type="submit" class="btn">提交报名</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

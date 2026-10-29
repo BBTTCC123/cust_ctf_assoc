@@ -3,26 +3,45 @@
 <head th:replace="~{fragments/layout :: head('积分榜')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <h1>积分榜</h1>
-    <nav class="tabs">
-        <a th:href="@{/points(type='ALL')}" th:classappend="${type=='ALL'} ? 'active'">总榜</a>
-        <a th:href="@{/points(type='YEAR')}" th:classappend="${type=='YEAR'} ? 'active'">年榜</a>
-        <a th:href="@{/points(type='QUARTER')}" th:classappend="${type=='QUARTER'} ? 'active'">季度榜</a>
-        <a th:href="@{/points(type='MONTH')}" th:classappend="${type=='MONTH'} ? 'active'">月榜</a>
-    </nav>
-    <p th:if="${#lists.isEmpty(rows)}" class="lead">还没有积分记录。</p>
-    <table class="table" th:unless="${#lists.isEmpty(rows)}">
-        <thead><tr><th>#</th><th>成员</th><th>积分</th></tr></thead>
-        <tbody>
-        <tr th:each="r : ${rows}">
-            <td th:text="${r.rank}">1</td>
-            <td><a th:href="@{/members/{id}(id=${r.userId})}" th:text="${r.nickname}">昵称</a></td>
-            <td th:text="${r.total}">0</td>
-        </tr>
-        </tbody>
-    </table>
-    <p class="hint">点击成员昵称可以查看积分构成；内部佐证不对外公开。</p>
+<main>
+    <section th:replace="~{fragments/layout :: pageHero('CUST · LEADERBOARD','积分榜','总榜、年榜、季度榜与月榜。每一分都能追溯到比赛奖、挖洞或护网记录。')}"></section>
+    <div class="container">
+        <div class="board-toolbar">
+            <nav class="tabs" aria-label="榜单类型">
+                <a th:href="@{/points(type='ALL')}" th:classappend="${type=='ALL'} ? 'active'">总榜</a>
+                <a th:href="@{/points(type='YEAR')}" th:classappend="${type=='YEAR'} ? 'active'">年榜</a>
+                <a th:href="@{/points(type='QUARTER')}" th:classappend="${type=='QUARTER'} ? 'active'">季度榜</a>
+                <a th:href="@{/points(type='MONTH')}" th:classappend="${type=='MONTH'} ? 'active'">月榜</a>
+            </nav>
+            <p class="hint" style="margin:0;">点击成员昵称查看积分构成</p>
+        </div>
+
+        <p th:if="${#lists.isEmpty(rows)}" class="lead">还没有积分记录。</p>
+        <div class="board-podium" th:unless="${#lists.isEmpty(rows)}">
+            <article class="card board-card" th:each="r, s : ${rows}" th:if="${s.index < 3}"
+                     th:classappend="${s.index == 0} ? 'rank-1' : (${s.index == 1} ? 'rank-2' : 'rank-3')">
+                <span class="board-rank" th:text="${s.index == 0 ? '01 / CHAMPION' : (s.index == 1 ? '02 / RUNNER-UP' : '03 / THIRD')}">01 / CHAMPION</span>
+                <a class="board-name" th:href="@{/members/{id}(id=${r.userId()})}" th:text="${r.nickname()}">昵称</a>
+                <p class="board-score" th:text="${r.total()}">0</p>
+            </article>
+        </div>
+
+        <div class="panel" th:unless="${#lists.isEmpty(rows)}">
+            <div class="table-wrap" style="overflow-x:auto;">
+                <table class="table" style="border:0;">
+                    <thead><tr><th>排名</th><th>成员</th><th>积分</th></tr></thead>
+                    <tbody>
+                    <tr th:each="r : ${rows}" th:classappend="${r.rank() <= 3} ? 'top-row'">
+                        <td class="rank-cell" th:text="${#numbers.formatInteger(r.rank(), 2)}">01</td>
+                        <td><a th:href="@{/members/{id}(id=${r.userId()})}" th:text="${r.nickname()}">昵称</a></td>
+                        <td th:text="${r.total()}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p class="hint" style="margin-top:14px;">内部佐证与备注不对外公开。</p>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

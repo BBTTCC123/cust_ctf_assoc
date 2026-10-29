@@ -3,10 +3,33 @@
 <head th:replace="~{fragments/layout :: head('关于')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <h1>关于</h1>
-    <p class="lead">这一页用来验证公共片段：页头和页脚跟首页是同一套。</p>
-    <p><a th:href="@{/}">回首页</a></p>
+<main>
+    <section th:replace="~{fragments/layout :: pageHero('CUST · ABOUT','关于协会','CUST 网络攻防协会：以攻促防，以赛练兵。把成绩、积分和技术留下来。')}"></section>
+    <div class="container">
+        <div class="grid-2">
+            <div class="panel">
+                <p class="eyebrow">WHO WE ARE</p>
+                <h2 style="margin-top:6px;">一个把热爱变成档案的地方</h2>
+                <p style="margin-top:10px;color:var(--ink-2);">协会面向对网络安全、CTF、渗透测试和应急响应感兴趣的同学。我们把散落在聊天记录里的成绩、积分、技术文章收进一个站里：学长毕业了，写的东西还留着。</p>
+                <p style="margin-top:10px;color:var(--ink-2);">无论你是刚入门，还是已经在打比赛，这里都有一起熬夜、一起复盘的队友。</p>
+            </div>
+            <div class="panel">
+                <p class="eyebrow">PRINCIPLES</p>
+                <h2 style="margin-top:6px;">几条硬规矩</h2>
+                <ul class="article-list">
+                    <li><span class="tag">01</span><span>积分流水只增不改，撤销靠反向流水。</span></li>
+                    <li><span class="tag">02</span><span>未审核媒体不进公共目录，访问必须过鉴权。</span></li>
+                    <li><span class="tag">03</span><span>涉及漏洞点的文章强制站内可见。</span></li>
+                    <li><span class="tag">04</span><span>仅供学习交流，禁止用于任何未授权测试。</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel" style="margin-top:18px;text-align:center;background:linear-gradient(120deg,#071c36,#0b3d75);color:#fff;border-color:transparent;">
+            <img th:src="@{/images/logo.webp}" alt="CUST 网络攻防协会会徽" style="width:76px;height:76px;border-radius:50%;background:#fff;padding:2px;margin:0 auto 14px;">
+            <h2 style="color:#fff;font-family:var(--font-display);">CUST · NETWORK ATTACK &amp; DEFENSE ASSOCIATION</h2>
+            <p style="color:#b9d6f3;margin-top:6px;font-size:13px;">个人名义维护，不代表任何学校或组织。站上不出现校名校徽；页脚常驻合规声明。</p>
+        </div>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

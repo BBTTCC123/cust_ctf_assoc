@@ -6,15 +6,43 @@
 <div class="admin-shell">
     <aside th:replace="~{admin/layout :: sidebar}"></aside>
     <main class="admin-main">
-        <h1>总览</h1>
+        <p class="eyebrow">CONTROL PANEL</p>
+        <h1 style="margin-top:6px;">总览</h1>
         <p class="lead" th:text="'当前登录：' + ${#authentication.name}">当前登录</p>
-        <ul class="role-list">
-            <li th:each="r : ${#authentication.authorities}" th:text="${r.authority}">ROLE</li>
-        </ul>
-        <p sec:authorize="hasRole('SUPER_ADMIN')">你是超管，能管账号、分权限、封号、看审计、管战队。</p>
-        <p sec:authorize="hasRole('POINTS_ADMIN')">你是积分管理员，能审积分、录比赛、处理申诉、管兑换。</p>
-        <p sec:authorize="hasRole('CONTENT_ADMIN')">你是内容管理员，能审文章、审评论、审图片。</p>
-        <p sec:authorize="hasRole('PR_ADMIN')">你是宣传管理员，能发公告、管首页。</p>
+
+        <div class="grid-3" style="margin-top:22px;">
+            <div class="panel">
+                <p class="eyebrow">ROLES</p>
+                <h2 style="margin-top:6px;">我的角色</h2>
+                <ul class="role-list">
+                    <li th:each="r : ${#authentication.authorities}" th:text="${r.authority}">ROLE</li>
+                </ul>
+            </div>
+            <div class="panel">
+                <p class="eyebrow">SHORTCUTS</p>
+                <h2 style="margin-top:6px;">常用入口</h2>
+                <ul class="article-list">
+                    <li sec:authorize="hasAnyRole('SUPER_ADMIN','POINTS_ADMIN')"><a th:href="@{/admin/points}">积分审核</a></li>
+                    <li sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN')"><a th:href="@{/admin/articles}">文章审核</a></li>
+                    <li sec:authorize="hasAnyRole('SUPER_ADMIN','PR_ADMIN')"><a th:href="@{/admin/public}">公告与招新</a></li>
+                    <li sec:authorize="hasRole('SUPER_ADMIN')"><a th:href="@{/admin/users}">账号与邀请</a></li>
+                </ul>
+            </div>
+            <div class="panel">
+                <p class="eyebrow">PERMISSIONS</p>
+                <h2 style="margin-top:6px;">职责范围</h2>
+                <p class="hint" sec:authorize="hasRole('SUPER_ADMIN')">超管：账号、权限、封号、审计、战队。</p>
+                <p class="hint" sec:authorize="hasRole('POINTS_ADMIN')">积分管理员：审积分、录比赛、处理申诉、管兑换。</p>
+                <p class="hint" sec:authorize="hasRole('CONTENT_ADMIN')">内容管理员：审文章、评论、图片与敏感词。</p>
+                <p class="hint" sec:authorize="hasRole('PR_ADMIN')">宣传管理员：公告、荣誉、首页与招新。</p>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-top:18px;background:linear-gradient(120deg,#071c36,#0b3d75);color:#fff;border-color:transparent;">
+            <p class="eyebrow" style="color:#8fd4ff;">REMINDER</p>
+            <h2 style="margin-top:6px;color:#fff;">所有敏感操作都会写入审计日志。</h2>
+            <p style="color:#b9d6f3;margin-top:6px;font-size:13px;">积分冲抵、角色变更、封号、内容下架与媒体审核都不可匿名操作；遇到异常先查审计日志。</p>
+        </div>
     </main>
 </div>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

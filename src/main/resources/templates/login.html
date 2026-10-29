@@ -3,26 +3,41 @@
 <head th:replace="~{fragments/layout :: head('登录')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container" style="max-width: 420px;">
-    <h1>登录</h1>
-    <p class="lead">站内文章、积分明细、内部资料需要登录后才能看。</p>
-    <p th:if="${message}" class="ok" th:text="${message}"></p>
-    <p th:if="${param.error != null and param.error[0] != 'too_many'}" class="err">账号或密码不对</p>
-    <p th:if="${param.error != null and param.error[0] == 'too_many'}" class="err">
-        登录失败次数过多，请 15 分钟后再试
-    </p>
-    <p th:if="${param.logout}" class="ok">已经退出登录</p>
-    <form method="post" th:action="@{/login}" class="login-form">
-        <label>账号
-            <input type="text" name="username" required autofocus autocomplete="username">
-        </label>
-        <label>密码
-            <input type="password" name="password" required autocomplete="current-password">
-        </label>
-        <button type="submit">登录</button>
-    </form>
-    <p class="hint">有邀请码？<a th:href="@{/register}">注册新账号</a></p>
-    <p class="hint">忘记密码请联系超管重置，重置后首次登录必须改密。</p>
+<main class="auth-page">
+    <section class="auth-visual">
+        <div>
+            <img class="brand-logo" th:src="@{/images/logo.webp}" alt="CUST 网络攻防协会会徽">
+            <p class="eyebrow" style="color:#8fd4ff;">MEMBER ACCESS</p>
+            <h1>欢迎回来。<br>继续你的攻防档案。</h1>
+            <p class="lead">站内文章、积分明细、战队空间和内部资料，登录后才能查看。</p>
+            <ul class="auth-points">
+                <li>查看仅站内开放的技术文章</li>
+                <li>管理自己的积分与申诉</li>
+                <li>和战队一起准备下一场比赛</li>
+            </ul>
+        </div>
+        <p class="hint" style="color:#a8c6e2;">CUST · NETWORK ATTACK &amp; DEFENSE ASSOCIATION</p>
+    </section>
+    <div class="panel auth-card">
+        <p class="eyebrow">SIGN IN</p>
+        <h2>登录</h2>
+        <p class="lead">使用协会分配的账号登录。</p>
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${param.error != null and param.error[0] != 'too_many'}" class="err">账号或密码不对</p>
+        <p th:if="${param.error != null and param.error[0] == 'too_many'}" class="err">登录失败次数过多，请 15 分钟后再试</p>
+        <p th:if="${param.logout}" class="ok">已经退出登录</p>
+        <form method="post" th:action="@{/login}" class="login-form">
+            <label>账号
+                <input type="text" name="username" required autofocus autocomplete="username" placeholder="登录名">
+            </label>
+            <label>密码
+                <input type="password" name="password" required autocomplete="current-password" placeholder="密码">
+            </label>
+            <button type="submit">登录</button>
+        </form>
+        <p class="hint">有邀请码？<a th:href="@{/register}" style="color:var(--blue);font-weight:600;">注册新账号</a></p>
+        <p class="hint">忘记密码请联系超管重置，重置后首次登录必须改密。</p>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

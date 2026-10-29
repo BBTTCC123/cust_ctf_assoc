@@ -3,86 +3,111 @@
 <head th:replace="~{fragments/layout :: head('成员积分')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <p class="crumb"><a th:href="@{/points}">← 积分榜</a></p>
-    <h1 th:text="${member.nickname()}">成员</h1>
-    <p class="lead">总分 <strong th:text="${member.total()}">0</strong> 分
-        <span class="hint">（公开页只展示分数构成，不含佐证和内部备注）</span></p>
-
-    <section th:if="${member.profile() != null}">
-        <h2>公开资料</h2>
-        <ul class="profile-list">
-            <li th:if="${member.profile().realName() != null}" th:text="'姓名：' + ${member.profile().realName()}">姓名</li>
-            <li th:if="${member.profile().studentNo() != null}" th:text="'学号：' + ${member.profile().studentNo()}">学号</li>
-            <li th:text="'学院：' + ${member.profile().college()} + ' / ' + ${member.profile().major()} + ' / ' + ${member.profile().grade()}">学院专业年级</li>
-            <li th:if="${member.profile().phone() != null}" th:text="'手机：' + ${member.profile().phone()}">手机</li>
-            <li th:if="${member.profile().email() != null}" th:text="'邮箱：' + ${member.profile().email()}">邮箱</li>
-            <li th:if="${member.profile().blog() != null}">
-                <a th:href="${member.profile().blog()}" target="_blank" rel="noopener noreferrer">博客 / 主页</a>
-            </li>
-        </ul>
-    </section>
-
-    <section>
-        <h2>能力雷达（六类竞赛）</h2>
-        <div th:if="${!member.radar().hasData()}" class="lead">还没有获奖记录，录入奖项后雷达图会自动出现。</div>
-        <div class="radar-wrap" th:if="${member.radar().hasData()}">
-            <svg class="radar" th:attr="viewBox=${member.radar().viewBox()}"
-                 role="img" aria-label="六类竞赛能力雷达图">
-                <polygon class="radar-grid" th:each="ring : ${member.radar().rings()}"
-                         th:attr="points=${ring}"></polygon>
-                <line class="radar-spoke" th:each="s : ${member.radar().spokes()}"
-                      th:attr="x1=${s.x1()},y1=${s.y1()},x2=${s.x2()},y2=${s.y2()}"></line>
-                <polygon class="radar-team" th:attr="points=${member.radar().teamPolygon()}"></polygon>
-                <polygon class="radar-personal" th:attr="points=${member.radar().personalPolygon()}"></polygon>
-                <text class="radar-label" th:each="l : ${member.radar().labels()}"
-                      th:attr="x=${l.x()},y=${l.y()},text-anchor=${l.anchor()}"
-                      th:text="${l.text()}">Web</text>
-            </svg>
-            <ul class="radar-legend">
-                <li><i class="legend personal"></i>个人获奖</li>
-                <li><i class="legend team"></i>团队奖份额</li>
-            </ul>
+<main>
+    <section class="page-hero">
+        <div class="page-hero-inner">
+            <div class="page-hero-copy">
+                <p class="crumb" style="margin-bottom:10px;"><a th:href="@{/points}" style="color:#8fd4ff;">← 积分榜</a></p>
+                <div class="member-hero">
+                    <div class="member-avatar" aria-hidden="true"
+                         th:text="${#strings.substring(member.nickname(),0,1)}">成</div>
+                    <div class="member-title">
+                        <h1 th:text="${member.nickname()}">成员</h1>
+                        <p class="lead">公开成绩页 · 不含佐证与内部备注</p>
+                    </div>
+                    <div class="member-stats">
+                        <div class="stat"><b th:text="${member.total()}">0</b><span>总积分</span></div>
+                        <div class="stat"><b th:text="${#lists.size(member.rows())}">0</b><span>积分记录</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="page-hero-mark" aria-hidden="true"><img th:src="@{/images/logo.webp}" alt=""></div>
         </div>
-        <table class="table radar-table" th:if="${member.radar().hasData()}">
-            <thead><tr><th>类别</th><th>个人获奖</th><th>团队奖份额</th><th>合计</th></tr></thead>
-            <tbody>
-            <tr th:each="axis : ${member.radar().axes()}">
-                <td th:text="${axis.label()}">Web</td>
-                <td th:text="${axis.personal()}">0</td>
-                <td th:text="${axis.team()}">0</td>
-                <td th:text="${axis.total()}">0</td>
-            </tr>
-            </tbody>
-        </table>
-        <p class="hint">统计口径：个人获奖记录 + 团队奖中分到本人的份额，按竞赛类别计数。</p>
     </section>
 
-    <h2>来源汇总</h2>
-    <p th:if="${#maps.isEmpty(member.bySource())}" class="lead">还没有积分记录。</p>
-    <ul class="source-list" th:unless="${#maps.isEmpty(member.bySource())}">
-        <li th:each="entry : ${member.bySource()}">
-            <span th:text="${entry.key}">来源</span>
-            <strong th:text="${entry.value} + ' 分'">0 分</strong>
-        </li>
-    </ul>
+    <div class="container">
+        <section class="section" th:if="${member.profile() != null}">
+            <div class="section-head"><div><p class="eyebrow">PROFILE</p><h2>公开资料</h2></div></div>
+            <ul class="profile-list">
+                <li th:if="${member.profile().realName() != null}" th:text="'姓名：' + ${member.profile().realName()}">姓名</li>
+                <li th:if="${member.profile().studentNo() != null}" th:text="'学号：' + ${member.profile().studentNo()}">学号</li>
+                <li th:text="${member.profile().college()} + ' / ' + ${member.profile().major()} + ' / ' + ${member.profile().grade()}">学院专业年级</li>
+                <li th:if="${member.profile().phone() != null}" th:text="'手机：' + ${member.profile().phone()}">手机</li>
+                <li th:if="${member.profile().email() != null}" th:text="'邮箱：' + ${member.profile().email()}">邮箱</li>
+                <li th:if="${member.profile().blog() != null}">
+                    <a th:href="${member.profile().blog()}" target="_blank" rel="noopener noreferrer">博客 / 主页 ↗</a>
+                </li>
+            </ul>
+        </section>
 
-    <section th:if="${member.detailsVisible()}">
-        <h2>明细</h2>
-        <p th:if="${#lists.isEmpty(member.rows())}" class="lead">还没有积分记录。</p>
-        <table class="table" th:unless="${#lists.isEmpty(member.rows())}">
-            <thead><tr><th>归属月</th><th>发生日</th><th>来源</th><th>类型</th><th>分数</th></tr></thead>
-            <tbody>
-            <tr th:each="r : ${member.rows()}">
-                <td th:text="${r.periodMonth()}">2026-10</td>
-                <td th:text="${r.occurredOn()}">日期</td>
-                <td th:text="${r.sourceType()}">来源</td>
-                <td th:text="${r.entryType() == 'REVERSAL' ? '冲抵' : '入账'}">入账</td>
-                <td th:text="${r.points()}">0</td>
-            </tr>
-            </tbody>
-        </table>
-    </section>
+        <section class="section">
+            <div class="section-head"><div><p class="eyebrow">ABILITY</p><h2>能力雷达 · 六类竞赛</h2></div></div>
+            <div class="panel">
+                <div th:if="${!member.radar().hasData()}" class="lead">还没有获奖记录，录入奖项后雷达图会自动出现。</div>
+                <div class="radar-wrap" th:if="${member.radar().hasData()}">
+                    <svg class="radar" th:attr="viewBox=${member.radar().viewBox()}" role="img" aria-label="六类竞赛能力雷达图">
+                        <polygon class="radar-grid" th:each="ring : ${member.radar().rings()}" th:attr="points=${ring}"></polygon>
+                        <line class="radar-spoke" th:each="s : ${member.radar().spokes()}"
+                              th:attr="x1=${s.x1()},y1=${s.y1()},x2=${s.x2()},y2=${s.y2()}"></line>
+                        <polygon class="radar-team" th:attr="points=${member.radar().teamPolygon()}"></polygon>
+                        <polygon class="radar-personal" th:attr="points=${member.radar().personalPolygon()}"></polygon>
+                        <text class="radar-label" th:each="l : ${member.radar().labels()}"
+                              th:attr="x=${l.x()},y=${l.y()},text-anchor=${l.anchor()}"
+                              th:text="${l.text()}">Web</text>
+                    </svg>
+                    <div>
+                        <ul class="radar-legend">
+                            <li><i class="legend personal"></i>个人获奖</li>
+                            <li><i class="legend team"></i>团队奖份额</li>
+                        </ul>
+                        <table class="table radar-table" th:if="${member.radar().hasData()}" style="margin-top:16px;">
+                            <thead><tr><th>类别</th><th>个人</th><th>团队</th><th>合计</th></tr></thead>
+                            <tbody>
+                            <tr th:each="axis : ${member.radar().axes()}">
+                                <td th:text="${axis.label()}">Web</td>
+                                <td th:text="${axis.personal()}">0</td>
+                                <td th:text="${axis.team()}">0</td>
+                                <td th:text="${axis.total()}">0</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <p class="hint" style="margin-top:14px;">统计口径：个人获奖记录 + 团队奖中分到本人的份额，按竞赛类别计数。</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-head"><div><p class="eyebrow">SOURCES</p><h2>来源汇总</h2></div></div>
+            <p th:if="${#maps.isEmpty(member.bySource())}" class="lead">还没有积分记录。</p>
+            <ul class="source-list" th:unless="${#maps.isEmpty(member.bySource())}">
+                <li th:each="entry : ${member.bySource()}">
+                    <span th:text="${entry.key}">来源</span>
+                    <strong th:text="${entry.value} + ' 分'">0 分</strong>
+                </li>
+            </ul>
+        </section>
+
+        <section class="section" th:if="${member.detailsVisible()}">
+            <div class="section-head"><div><p class="eyebrow">HISTORY</p><h2>积分明细</h2></div></div>
+            <p th:if="${#lists.isEmpty(member.rows())}" class="lead">还没有积分记录。</p>
+            <div class="panel" th:unless="${#lists.isEmpty(member.rows())}" style="padding:0;overflow:hidden;">
+                <table class="table" style="border:0;">
+                    <thead><tr><th>归属月</th><th>发生日</th><th>来源</th><th>类型</th><th>分数</th></tr></thead>
+                    <tbody>
+                    <tr th:each="r : ${member.rows()}">
+                        <td th:text="${r.periodMonth()}">2026-10</td>
+                        <td th:text="${r.occurredOn()}">日期</td>
+                        <td th:text="${r.sourceType()}">来源</td>
+                        <td><span class="tag" th:classappend="${r.entryType() == 'REVERSAL'} ? 'danger'" th:text="${r.entryType() == 'REVERSAL' ? '冲抵' : '入账'}">入账</span></td>
+                        <td th:text="${r.points()}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="hint" style="margin-top:12px;">完整明细仅本人、队长、积分管理员和教师可见。</p>
+        </section>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

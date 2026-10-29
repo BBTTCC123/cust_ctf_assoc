@@ -3,45 +3,50 @@
 <head th:replace="~{fragments/layout :: head('技术空间')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <h1>技术空间</h1>
-    <p class="lead" th:if="${loggedIn}">站内可见的文章都在这儿；标了「公开」的游客也能看。</p>
-    <p class="lead" th:unless="${loggedIn}">这里只有公开文章。登录后能看到站内的全部内容。</p>
+<main>
+    <section th:replace="~{fragments/layout :: pageHero('CUST · TECH SPACE','技术空间','把踩过的坑、写过的工具和打过的靶场留下来。登录后还能看到仅站内开放的文章。')}"></section>
+    <div class="container">
+        <form method="get" th:action="@{/articles}" class="search-bar">
+            <input type="search" name="q" th:value="${q}" placeholder="搜索标题、摘要或正文" maxlength="100" aria-label="搜索文章">
+            <select name="tag" aria-label="按标签筛选">
+                <option value="">全部标签</option>
+                <option th:each="t : ${tags}" th:value="${t}" th:text="${t}" th:selected="${t == tag}">标签</option>
+            </select>
+            <button type="submit" class="btn">搜索</button>
+            <a th:if="${q != null or tag != null}" th:href="@{/articles}" class="link-btn">清空</a>
+        </form>
+        <p class="hint" style="margin-top:-10px;margin-bottom:20px;"
+           th:text="${loggedIn} ? '已登录：公开与站内文章都会出现在这里。' : '当前仅显示公开文章；登录后可看站内内容。'">提示</p>
 
-    <form method="get" th:action="@{/articles}" class="search-bar">
-        <input type="search" name="q" th:value="${q}" placeholder="搜索标题、摘要或正文" maxlength="100">
-        <select name="tag">
-            <option value="">全部标签</option>
-            <option th:each="t : ${tags}" th:value="${t}" th:text="${t}" th:selected="${t == tag}">标签</option>
-        </select>
-        <button type="submit" class="btn">筛选</button>
-        <a th:if="${q != null or tag != null}" th:href="@{/articles}" class="hint">清空</a>
-    </form>
+        <p th:if="${#lists.isEmpty(articles.content)}" class="lead">没有找到文章。</p>
+        <div class="article-grid" th:unless="${#lists.isEmpty(articles.content)}">
+            <article class="card article-card" th:each="a : ${articles.content}">
+                <a th:if="${a.coverMediaId() != null}" class="cover-link" th:href="@{/articles/{id}(id=${a.id()})}">
+                    <img class="cover" th:src="@{/media/{id}(id=${a.coverMediaId()})}" th:alt="${a.title()}">
+                </a>
+                <div class="cover-fallback" th:if="${a.coverMediaId() == null}" aria-hidden="true"></div>
+                <div class="article-card-body">
+                    <p class="comp-date" th:text="${#temporals.format(a.publishedAt(),'yyyy-MM-dd')}">日期</p>
+                    <h2><a th:href="@{/articles/{id}(id=${a.id()})}" th:text="${a.title()}">标题</a></h2>
+                    <p class="muted" th:text="'作者：' + ${a.authorName()}">作者</p>
+                    <p th:if="${a.summary()}" th:text="${a.summary()}">摘要</p>
+                    <p class="tag-row">
+                        <span class="tag" th:each="t : ${a.tags()}" th:text="${t}">标签</span>
+                        <span class="tag" th:text="${a.visibility() == 'PUBLIC'} ? '公开' : '站内'">站内</span>
+                        <span class="tag warn" th:if="${a.involvesVuln()}">涉漏洞点</span>
+                    </p>
+                </div>
+            </article>
+        </div>
 
-    <p th:if="${#lists.isEmpty(articles.content)}" class="lead">没有找到文章。</p>
-    <div class="article-grid">
-        <article class="card" th:each="a : ${articles.content}">
-            <a th:if="${a.coverMediaId() != null}" th:href="@{/articles/{id}(id=${a.id()})}">
-                <img class="cover" th:src="@{/media/{id}(id=${a.coverMediaId()})}" th:alt="${a.title()}">
-            </a>
-            <h2><a th:href="@{/articles/{id}(id=${a.id()})}" th:text="${a.title()}">标题</a></h2>
-            <p class="muted" th:text="${a.authorName()} + ' · ' + ${#temporals.format(a.publishedAt(),'yyyy-MM-dd')}">作者 · 日期</p>
-            <p th:if="${a.summary()}" th:text="${a.summary()}">摘要</p>
-            <p class="tag-row">
-                <span class="tag" th:each="t : ${a.tags()}" th:text="${t}">标签</span>
-                <span class="tag" th:text="${a.visibility() == 'PUBLIC'} ? '公开' : '站内'">站内</span>
-                <span class="tag warn" th:if="${a.involvesVuln()}">涉漏洞点</span>
-            </p>
-        </article>
+        <nav class="pager" th:if="${articles.totalPages > 1}" aria-label="分页">
+            <a th:if="${articles.hasPrevious()}"
+               th:href="@{/articles(q=${q},tag=${tag},page=${articles.number - 1})}">← 上一页</a>
+            <span th:text="${articles.number + 1} + ' / ' + ${articles.totalPages}">1 / 1</span>
+            <a th:if="${articles.hasNext()}"
+               th:href="@{/articles(q=${q},tag=${tag},page=${articles.number + 1})}">下一页 →</a>
+        </nav>
     </div>
-
-    <nav class="pager" th:if="${articles.totalPages > 1}">
-        <a th:if="${articles.hasPrevious()}"
-           th:href="@{/articles(q=${q},tag=${tag},page=${articles.number - 1})}">上一页</a>
-        <span th:text="${articles.number + 1} + ' / ' + ${articles.totalPages}">1 / 1</span>
-        <a th:if="${articles.hasNext()}"
-           th:href="@{/articles(q=${q},tag=${tag},page=${articles.number + 1})}">下一页</a>
-    </nav>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

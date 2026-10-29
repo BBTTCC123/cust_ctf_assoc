@@ -3,21 +3,37 @@
 <head th:replace="~{fragments/layout :: head(${a.title})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <p><a th:href="@{/announcements}">← 全部公告</a></p>
-    <h1 th:text="${a.title}">标题</h1>
-    <p class="muted" th:text="${#temporals.format(a.publishedAt,'yyyy-MM-dd HH:mm')}">时间</p>
-    <div class="markdown-body" th:utext="${a.contentHtml}">正文</div>
-
-    <section th:if="${!#lists.isEmpty(attachments)}">
-        <h2>附件</h2>
-        <ul class="article-list">
-            <li th:each="f : ${attachments}">
-                <a th:href="@{/media/{id}(id=${f.mediaId()})}" target="_blank" rel="noopener"
-                   th:text="${f.originalName()}">附件</a>
-            </li>
-        </ul>
+<main>
+    <section class="page-hero">
+        <div class="page-hero-inner">
+            <div class="page-hero-copy">
+                <p class="crumb" style="margin-bottom:10px;"><a th:href="@{/announcements}" style="color:#8fd4ff;">← 全部公告</a></p>
+                <p class="eyebrow">CUST · NOTICE</p>
+                <h1 th:text="${a.title}">标题</h1>
+                <p class="hint" style="color:#9fc4e8;margin-top:10px;" th:text="${#temporals.format(a.publishedAt,'yyyy-MM-dd HH:mm')}">时间</p>
+            </div>
+            <div class="page-hero-mark" aria-hidden="true"><img th:src="@{/images/logo.webp}" alt=""></div>
+        </div>
     </section>
+    <div class="container">
+        <article class="article-page">
+            <div class="panel" style="padding:clamp(22px,4vw,42px);">
+                <div class="markdown-body" th:utext="${a.contentHtml}">正文</div>
+            </div>
+            <section th:if="${!#lists.isEmpty(attachments)}" class="section">
+                <div class="section-head"><div><p class="eyebrow">ATTACHMENTS</p><h2>附件</h2></div></div>
+                <div class="panel">
+                    <ul class="article-list">
+                        <li th:each="f : ${attachments}">
+                            <a th:href="@{/media/{id}(id=${f.mediaId()})}" target="_blank" rel="noopener"
+                               th:text="${f.originalName()}">附件</a>
+                            <span class="tag">下载</span>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </article>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

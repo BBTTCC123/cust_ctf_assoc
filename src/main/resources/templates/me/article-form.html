@@ -3,51 +3,56 @@
 <head th:replace="~{fragments/layout :: head('写文章')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <p class="crumb"><a th:href="@{/me/articles}">← 我的文章</a></p>
-    <h1 th:text="${editing} ? '编辑文章' : '写一篇'">写一篇</h1>
-    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
-    <p th:if="${article != null and article.rejectReason() != null}" class="err"
-       th:text="'上次被驳回：' + ${article.rejectReason()}"></p>
-    <form th:action="${formAction}" method="post" class="form-grid single">
-        <label>标题
-            <input type="text" name="title" required maxlength="200"
-                   th:value="${article != null ? article.title() : ''}">
-        </label>
-        <label>摘要（可选）
-            <input type="text" name="summary" maxlength="500"
-                   th:value="${article != null ? article.summary() : ''}">
-        </label>
-        <label>正文（Markdown）
-            <textarea name="contentMd" rows="16" required
-                      th:text="${article != null ? article.contentMd() : ''}"></textarea>
-        </label>
-        <label>标签（逗号分隔，最多 8 个）
-            <input type="text" name="tags" maxlength="300"
-                   th:value="${article != null ? #strings.listJoin(article.tags(), ',') : ''}">
-        </label>
-        <label>封面媒体 ID（可选，需先审核通过）
-            <input type="number" name="coverMediaId" min="1"
-                   th:value="${article != null and article.coverMediaId() != null ? article.coverMediaId() : ''}">
-            <span class="hint">在媒体上传并经内容管理员审核通过后，把 id 填在这里。</span>
-        </label>
-        <label class="inline-check">
-            <input type="checkbox" name="involvesVuln" value="true"
-                   th:checked="${article != null and article.involvesVuln()}">
-            涉及漏洞点（勾了就只能站内可见）
-        </label>
-        <label>可见性
-            <select name="visibility">
-                <option value="INTERNAL" th:selected="${article != null and article.visibility() == 'INTERNAL'}">站内</option>
-                <option value="PUBLIC" th:selected="${article != null and article.visibility() == 'PUBLIC'}">公开</option>
-            </select>
-        </label>
-        <div class="form-actions">
-            <button type="submit" class="btn ghost" th:if="${!editing}" name="submit" value="false">保存草稿</button>
-            <button type="submit" class="btn" th:if="${!editing}" name="submit" value="true">保存并提交审核</button>
-            <button type="submit" class="btn" th:if="${editing}">保存草稿</button>
+<main>
+    <section th:replace="~{fragments/layout :: pageHero('MEMBER · WRITING','写一篇文章','支持 Markdown。涉及真实漏洞点的文章会被强制设为站内可见；所有文章先审后发。')}"></section>
+    <div class="container">
+        <div class="panel" style="max-width:900px;margin:0 auto;">
+            <p class="crumb"><a th:href="@{/me/articles}">← 我的文章</a></p>
+            <h1 th:text="${editing} ? '编辑文章' : '写一篇'">写一篇</h1>
+            <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+            <p th:if="${article != null and article.rejectReason() != null}" class="err"
+               th:text="'上次被驳回：' + ${article.rejectReason()}"></p>
+            <form th:action="${formAction}" method="post" class="form-grid single">
+                <label>标题
+                    <input type="text" name="title" required maxlength="200"
+                           th:value="${article != null ? article.title() : ''}" placeholder="给文章起个标题">
+                </label>
+                <label>摘要（可选）
+                    <input type="text" name="summary" maxlength="500"
+                           th:value="${article != null ? article.summary() : ''}" placeholder="一句话说明这篇文章讲什么">
+                </label>
+                <label>正文（Markdown）
+                    <textarea name="contentMd" rows="18" required
+                              th:text="${article != null ? article.contentMd() : ''}" placeholder="# 从这里开始写……"></textarea>
+                </label>
+                <label>标签（逗号分隔，最多 8 个）
+                    <input type="text" name="tags" maxlength="300"
+                           th:value="${article != null ? #strings.listJoin(article.tags(), ',') : ''}" placeholder="Web, 靶场, 复现">
+                </label>
+                <label>封面媒体 ID（可选，需先审核通过）
+                    <input type="number" name="coverMediaId" min="1"
+                           th:value="${article != null and article.coverMediaId() != null ? article.coverMediaId() : ''}" placeholder="媒体 ID">
+                    <span class="hint">在媒体上传并经内容管理员审核通过后，把 id 填在这里。</span>
+                </label>
+                <label class="inline-check">
+                    <input type="checkbox" name="involvesVuln" value="true"
+                           th:checked="${article != null and article.involvesVuln()}">
+                    涉及漏洞点（勾了就只能站内可见）
+                </label>
+                <label>可见性
+                    <select name="visibility">
+                        <option value="INTERNAL" th:selected="${article != null and article.visibility() == 'INTERNAL'}">站内</option>
+                        <option value="PUBLIC" th:selected="${article != null and article.visibility() == 'PUBLIC'}">公开</option>
+                    </select>
+                </label>
+                <div class="form-actions">
+                    <button type="submit" class="btn ghost" th:if="${!editing}" name="submit" value="false">保存草稿</button>
+                    <button type="submit" class="btn" th:if="${!editing}" name="submit" value="true">保存并提交审核</button>
+                    <button type="submit" class="btn" th:if="${editing}">保存草稿</button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

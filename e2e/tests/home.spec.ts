@@ -4,7 +4,7 @@ test('首页与公开导航可访问', async ({ page }) => {
   await page.goto('/');
 
   await expect(page).toHaveTitle(/网络攻防协会/);
-  await expect(page.getByRole('heading', { name: '网络攻防协会', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /以攻促防/ })).toBeVisible();
 
   const nav = page.locator('header nav');
   await expect(nav.getByRole('link', { name: '竞赛档案', exact: true })).toBeVisible();

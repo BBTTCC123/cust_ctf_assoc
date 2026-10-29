@@ -3,13 +3,21 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${title} + ' · 管理后台'">管理后台</title>
+    <meta name="theme-color" content="#06182f">
+    <title th:text="${title} + ' · 管理后台 · CUST 网络攻防协会'">管理后台</title>
+    <link rel="icon" th:href="@{/images/logo.webp}" type="image/webp">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/js/app.js}" defer></script>
 </head>
 <body>
-<header th:fragment="topbar" class="site-header">
-    <a class="brand" th:href="@{/}">网络攻防协会 · 后台</a>
+<header th:fragment="topbar" class="admin-topbar">
+    <a class="brand" th:href="@{/admin}">
+        <img class="brand-logo" th:src="@{/images/logo.webp}" alt="CUST 网络攻防协会会徽">
+        <span class="brand-copy">
+            <strong>协会后台</strong>
+            <small>CUST · CONTROL PANEL</small>
+        </span>
+    </a>
     <nav>
         <a th:href="@{/}">回前台</a>
         <a th:href="@{/password/change}">修改密码</a>

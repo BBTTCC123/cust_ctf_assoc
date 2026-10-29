@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>请求无法完成</title>
-    <style>body{font-family:system-ui;text-align:center;padding:80px 20px;color:#1f2933}
-    .msg{color:#b91c1c;font-size:1.1rem}.id{color:#616e7c;font-size:.85rem}</style>
-</head>
+<head th:replace="~{fragments/layout :: head('请求无法完成')}"></head>
 <body>
-<h1>请求无法完成</h1>
-<p class="msg" th:text="${message}">原因</p>
-<p><a th:href="@{/}">回首页</a></p>
-<p class="id" th:if="${requestId}" th:text="'错误编号：' + ${requestId}">错误编号</p>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="error-page">
+    <p class="error-code">REQUEST / BLOCKED</p>
+    <h1>请求无法完成。</h1>
+    <p th:text="${message}">原因</p>
+    <p class="hint" th:if="${requestId}" th:text="'错误编号：' + ${requestId}">错误编号</p>
+    <p style="margin-top:18px;"><a class="btn" th:href="@{/}">回首页</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>
