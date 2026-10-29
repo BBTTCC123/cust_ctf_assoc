@@ -63,9 +63,17 @@ public class CommentService {
         return repository.findByStateOrderByCreatedAtAsc("PENDING");
     }
 
+    @Transactional(readOnly = true)
+    public List<CommentEntity> moderationQueue() {
+        return repository.findByStateInOrderByCreatedAtDesc(List.of("PENDING", "APPROVED"));
+    }
+
     @Transactional
     public void approve(Long commentId, Long reviewerId) {
         CommentEntity comment = requirePending(commentId);
+        if (sensitiveWords.check(comment.getContent()) == SensitiveWordService.Result.BLOCK) {
+            throw new BizException("评论当前命中阻塞词，不能通过审核");
+        }
         comment.setState("APPROVED");
         comment.setReviewedBy(reviewerId);
         comment.setReviewedAt(LocalDateTime.now());
@@ -81,6 +89,20 @@ public class CommentService {
         comment.setReviewedAt(LocalDateTime.now());
         repository.save(comment);
         audit.record("COMMENT_REJECT", "COMMENT", commentId, "PENDING", "REJECTED");
+    }
+
+    @Transactional
+    public void revoke(Long commentId, Long reviewerId) {
+        CommentEntity comment = repository.findById(commentId)
+                .orElseThrow(() -> new BizException("评论不存在"));
+        if (!"APPROVED".equals(comment.getState())) {
+            throw new BizException("只有已通过评论才能下架");
+        }
+        comment.setState("REVOKED");
+        comment.setReviewedBy(reviewerId);
+        comment.setReviewedAt(LocalDateTime.now());
+        repository.save(comment);
+        audit.record("COMMENT_REVOKE", "COMMENT", commentId, "APPROVED", "REVOKED");
     }
 
     private CommentEntity requirePending(Long commentId) {

@@ -7,7 +7,10 @@
     <h1>登录</h1>
     <p class="lead">站内文章、积分明细、内部资料需要登录后才能看。</p>
     <p th:if="${message}" class="ok" th:text="${message}"></p>
-    <p th:if="${param.error}" class="err">账号或密码不对</p>
+    <p th:if="${param.error != null and param.error[0] != 'too_many'}" class="err">账号或密码不对</p>
+    <p th:if="${param.error != null and param.error[0] == 'too_many'}" class="err">
+        登录失败次数过多，请 15 分钟后再试
+    </p>
     <p th:if="${param.logout}" class="ok">已经退出登录</p>
     <form method="post" th:action="@{/login}" class="login-form">
         <label>账号

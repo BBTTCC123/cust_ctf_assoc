@@ -12,7 +12,7 @@
 
 - 首页：协会简介、最新公告、荣誉、积分前三（只显示昵称）
 - 竞赛档案：列表、赛季筛选、比赛详情（参赛成员、个人/团队奖项、现场照片）
-- 积分榜：总榜 / 年榜 / 季度榜 / 月榜；点昵称看公开积分明细
+- 积分榜：总榜 / 年榜 / 季度榜 / 月榜；点昵称看总成绩、来源汇总和能力图。逐笔明细仅本人、队长、积分管理员和教师可见
 - 技术空间：公开文章、标签筛选、关键词检索、评论展示
 - 公告、荣誉墙、加入我们（招新报名表，填完不用注册账号）
 - 邀请码注册
@@ -63,9 +63,9 @@
 | 组件 | 版本 / 说明 |
 |---|---|
 | Java | 21 |
-| Spring Boot | 3.5.16 |
+| Spring Boot | 4.1.2 |
 | 模板 | Thymeleaf（服务端渲染，不做前后端分离） |
-| 安全 | Spring Security 6 + BCrypt + 会话 Cookie + SessionRegistry 会话撤销 + CSP |
+| 安全 | Spring Security 7.1.2 + BCrypt + 会话 Cookie + SessionRegistry 会话撤销 + 登录失败限流 + CSP |
 | 数据 | Spring Data JPA（`ddl-auto=validate`）+ MySQL 8 |
 | 迁移 | Flyway（表结构只由 `db/migration` 管） |
 | 校验 | Bean Validation |
@@ -73,7 +73,7 @@
 | 测试 | JUnit 5 + MockMvc + Testcontainers MySQL + Playwright |
 | 构建 | Maven 3.9+ |
 
-> Maven 3.6.1 跑不了 Spring Boot 3（插件要求 3.6.3+），这是升级过的原因。
+> Maven 3.6.1 跑不了当前 Spring Boot 4 构建链，请使用 Maven 3.9+。
 
 ---
 
@@ -131,11 +131,11 @@ mvn spring-boot:run
 ### 5. 跑测试
 
 ```bash
-mvn test                 # 58 个单元/页面测试（纯函数、策略、Markdown、敏感词、战队/兑换、页面渲染）
-mvn verify               # 单元测试 + 24 个集成测试（Testcontainers 起 MySQL 8.0）
+mvn test                 # 62 个单元/页面测试（纯函数、策略、Markdown、敏感词、战队/兑换、权限辅助、页面渲染）
+mvn verify               # 单元测试 + 30 个集成测试（Testcontainers 起 MySQL 8.0）
 ```
 
-**集成测试（`*IT`）** 用 Testcontainers 启动一次性 MySQL，覆盖 V1-V9 空库迁移、四角色 URL 权限矩阵、积分封顶/申诉冲抵/幂等键、媒体两阶段审核与三档可见性、登录/强制改密/邀请码注册/CSP/招新限流。
+**集成测试（`*IT`）** 用 Testcontainers 启动一次性 MySQL，覆盖 V1-V10 空库迁移、四角色 URL 权限矩阵、积分封顶/申诉冲抵/幂等键、媒体两阶段审核与三档可见性、登录/强制改密/邀请码注册/CSP/招新限流、公开隐私和多会话撤销。
 
 - CI 的 `integration-tests` 任务直接跑 `mvn verify -DskipUnitTests=true`，PR 必跑。
 - 本机没有 Docker 时，可指向一个**专供测试的空库**（名字建议 `assoc_it`）跑同一套用例：
@@ -175,14 +175,14 @@ src/main/java/cn/edu/cust/assoc
 └─ security      从数据库加载用户、当前用户、强制改密过滤器
 
 src/main/resources
-├─ db/migration  V1~V9 迁移脚本
+├─ db/migration  V1~V10 迁移脚本
 ├─ templates     Thymeleaf 页面（公开页 + admin/ + me/）
 ├─ static        样式与确认弹窗脚本
 └─ application.yml
 
 src/test/java/cn/edu/cust/assoc
 ├─ support       IntegrationTestBase / TestDatabase / TestContainerConfig
-├─ migration     FlywayMigrationIT（空库执行 V1-V9）
+├─ migration     FlywayMigrationIT（空库执行 V1-V10）
 ├─ security      四角色 URL 矩阵、认证流程、CSP 与招新限流
 └─ service       积分封顶/冲抵/幂等、媒体两阶段审核与可见性
 
@@ -207,8 +207,9 @@ docs/            开发规范、本地开发、运维手册、部署清单
 | V7 | 公告 / 荣誉 / 招新报名 |
 | V8 | 强制改密、审计日志、媒体关联、标签/评论/收藏、内容软删除、团队奖唯一约束、积分外键、规则种子、移除演示数据 |
 | V9 | 战队空间增量（创建/入队时间、状态约束）、兑换资源与兑换申请 |
+| V10 | 修复战队成员唯一约束、待审申诉/兑换并发约束、评论下架与旧账号强制改密 |
 
-**已经执行过的迁移不要改**，要改结构就新建 V9、V10。
+**已经执行过的迁移不要改**，要改结构就新建 V11。
 
 ---
 
@@ -241,11 +242,12 @@ docs/            开发规范、本地开发、运维手册、部署清单
 
 ## 账号与安全
 
-- 账号来源：超管创建成员、邀请码自助注册；没有公开注册入口。
+- 账号来源：超管创建成员、邀请码自助注册；没有无邀请码的公开注册入口。
 - 改密：本人可自助修改；忘记密码由超管重置（一次性临时密码，只显示一次）。
-- 会话撤销：禁用、改角色、重置密码后目标用户全部会话立即过期。
+- 会话撤销：本人改密、禁用、改角色、重置密码后目标用户全部会话立即过期。
+- 登录保护：同一 IP + 登录名连续失败 5 次后暂停 15 分钟；单机使用进程内计数。
 - 四类管理员按 URL 和菜单双重分权，越权访问返回 403。
-- Markdown 链接/图片只允许 http、https、mailto（链接）和站内相对地址；模板禁止内联脚本，CSP 由应用与 Nginx 双重下发。
+- Markdown 链接允许 http、https、mailto 和站内相对地址；外链图片只允许 https，模板禁止内联脚本，CSP 由应用与 Nginx 双重下发。
 - 招新表单按真实 IP（Nginx 覆盖 X-Forwarded-For）和学号各限 5 次/小时；进程内计数，多实例部署需换 Redis。
 
 ---
@@ -267,8 +269,10 @@ docs/            开发规范、本地开发、运维手册、部署清单
 - 战队成员由队长按登录用户名直接添加，没有邀请确认流程；战队解散后名字仍被占用，不能复用。
 - 积分兑换在待审核阶段不预留积分、不锁库存，以审核通过时的余额与库存为准，先到先得。
 - 招新限流是**进程内计数**，重启清零；多实例部署需要换 Redis。
+- 登录失败限流同样是进程内计数，多实例部署需要换 Redis。
 - 敏感词是「规范化 + 包含匹配」，能挡零宽字符、全角、换行和制表符，挡不住拼音谐音，所以评论和文章必须配人工审核。
 - 文章禁止复制只是前端提示，截图和看源码都能绕过。
+- 社区、内部工具、镜像仓库和资料下载仍不在 1.0 范围内。
 
 ---
 

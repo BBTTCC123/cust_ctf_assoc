@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.controller;
 
+import cn.edu.cust.assoc.common.BizException;
 import cn.edu.cust.assoc.domain.TeamEntity;
 import cn.edu.cust.assoc.dto.TeamDetail;
 import cn.edu.cust.assoc.dto.TeamForm;
@@ -56,7 +57,7 @@ public class TeamController {
             TeamEntity team = teamService.create(currentUser.id(auth), form.getName(), form.getIntro());
             redirect.addFlashAttribute("message", "战队创建成功，你就是队长");
             return "redirect:/teams/" + team.getId();
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             return flashError(redirect, e.getMessage(), "/teams");
         }
     }
@@ -67,7 +68,7 @@ public class TeamController {
         try {
             teamService.addMember(currentUser.id(auth), id, username);
             redirect.addFlashAttribute("message", "成员已加入战队");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             return flashError(redirect, e.getMessage(), "/teams/" + id);
         }
         return "redirect:/teams/" + id;
@@ -79,7 +80,7 @@ public class TeamController {
         try {
             teamService.removeMember(currentUser.id(auth), id, userId);
             redirect.addFlashAttribute("message", "成员已移出战队");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             return flashError(redirect, e.getMessage(), "/teams/" + id);
         }
         return "redirect:/teams/" + id;
@@ -91,7 +92,7 @@ public class TeamController {
             teamService.leave(currentUser.id(auth), id);
             redirect.addFlashAttribute("message", "已退出战队");
             return "redirect:/teams";
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             return flashError(redirect, e.getMessage(), "/teams/" + id);
         }
     }
@@ -102,7 +103,7 @@ public class TeamController {
         try {
             teamService.transferLeader(currentUser.id(auth), id, userId);
             redirect.addFlashAttribute("message", "队长已转让");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             return flashError(redirect, e.getMessage(), "/teams/" + id);
         }
         return "redirect:/teams/" + id;
@@ -114,7 +115,7 @@ public class TeamController {
         try {
             teamService.updateIntro(currentUser.id(auth), id, intro);
             redirect.addFlashAttribute("message", "战队简介已更新");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             return flashError(redirect, e.getMessage(), "/teams/" + id);
         }
         return "redirect:/teams/" + id;
@@ -126,7 +127,7 @@ public class TeamController {
             teamService.disband(currentUser.id(auth), id, false);
             redirect.addFlashAttribute("message", "战队已解散");
             return "redirect:/teams";
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             return flashError(redirect, e.getMessage(), "/teams/" + id);
         }
     }

@@ -23,7 +23,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * V1-V8 必须在全新空库上一次性执行成功。
+ * V1-V10 必须在全新空库上一次性执行成功。
  *
  * 这里不复用 Spring 上下文：单独建一个临时库（容器或外部实例），
  * 从零跑 Flyway，再把关键表、唯一约束和列型逐项查出来。
@@ -45,7 +45,8 @@ class FlywayMigrationIT {
             "points_rule", "vulnerability", "points_request", "points_ledger", "points_appeal",
             "article", "sensitive_word",
             "announcement", "honor", "recruit_application",
-            "audit_log", "media_link", "article_tag", "comment", "favorite", "team_award_dedupe_log");
+            "audit_log", "media_link", "article_tag", "comment", "favorite",
+            "team_award_dedupe_log", "team_member_dedupe_log");
 
     private static MySQLContainer<?> container;
     private static String jdbcUrl;
@@ -100,7 +101,7 @@ class FlywayMigrationIT {
 
         MigrateResult result = flyway.migrate();
 
-        // V1-V8 必须全部执行成功；后续新增迁移（V9+）不影响这条基线断言
+        // V1-V8 必须全部执行成功；后续新增迁移继续顺延执行
         assertThat(result.migrationsExecuted).isGreaterThanOrEqualTo(8);
         assertThat(result.success).isTrue();
 
@@ -111,7 +112,8 @@ class FlywayMigrationIT {
             assertThat(info.getState().isApplied()).isTrue();
             versions.add(info.getVersion().getVersion());
         }
-        assertThat(versions).containsSubsequence("1", "2", "3", "4", "5", "6", "7", "8");
+        assertThat(versions).containsSubsequence(
+                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
         assertThat(flyway.info().pending()).isEmpty();
 
         // validate 会比对校验和，防止有人改了已执行过的迁移
@@ -156,6 +158,9 @@ class FlywayMigrationIT {
         // 同一平台漏洞编号唯一；团队奖按比赛+名次唯一
         assertThat(uniqueIndexesOf("vulnerability")).contains("uk_vulnerability");
         assertThat(uniqueIndexesOf("team_award")).contains("uk_team_award_comp_rank");
+        assertThat(uniqueIndexesOf("team_member")).contains("uk_team_member_active_user");
+        assertThat(uniqueIndexesOf("points_appeal")).contains("uk_points_appeal_open_ledger");
+        assertThat(uniqueIndexesOf("redeem_request")).contains("uk_redeem_pending_user_item");
         // V8 增加的强制改密列必须是 NOT NULL
         assertThat(columnType("user", "must_change_password"))
                 .as("V8 必须补上 must_change_password 列")

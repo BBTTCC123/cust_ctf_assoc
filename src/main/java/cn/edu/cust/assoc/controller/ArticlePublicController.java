@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.controller;
 
+import cn.edu.cust.assoc.common.BizException;
 import cn.edu.cust.assoc.dto.ArticleCard;
 import cn.edu.cust.assoc.dto.ArticleDetail;
 import cn.edu.cust.assoc.service.ArticleService;
@@ -77,7 +78,7 @@ public class ArticlePublicController {
         try {
             commentService.add(id, currentUser.id(auth), content);
             redirect.addFlashAttribute("message", "评论已提交，审核通过后展示");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/articles/" + id;

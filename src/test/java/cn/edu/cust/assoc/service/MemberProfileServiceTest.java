@@ -23,7 +23,8 @@ class MemberProfileServiceTest {
         MemberProfileEntity entity = profile(false, false, false, false, false);
         when(repository.findByUserId(1L)).thenReturn(Optional.of(entity));
 
-        ProfileView view = service.publicView(1L).orElseThrow();
+        ProfileView view = service.publicView(1L, true).orElseThrow();
+        assertThat(service.publicView(1L, false)).isEmpty();
 
         assertThat(view.realName()).isNull();
         assertThat(view.studentNo()).isNull();
@@ -42,7 +43,7 @@ class MemberProfileServiceTest {
         MemberProfileEntity entity = profile(true, false, true, false, true);
         when(repository.findByUserId(2L)).thenReturn(Optional.of(entity));
 
-        ProfileView view = service.publicView(2L).orElseThrow();
+        ProfileView view = service.publicView(2L, true).orElseThrow();
 
         assertThat(view.realName()).isEqualTo("张三");
         assertThat(view.studentNo()).isNull();

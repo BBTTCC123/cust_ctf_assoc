@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.service;
 
+import cn.edu.cust.assoc.common.BizException;
 import cn.edu.cust.assoc.domain.RoleEntity;
 import cn.edu.cust.assoc.domain.UserEntity;
 import cn.edu.cust.assoc.repository.RoleRepository;
@@ -41,11 +42,22 @@ public class UserAdminService {
     /** 整体替换某人的角色。传空集合 = 收回所有管理权限（还剩普通用户身份）。 */
     @Transactional
     public void setRoles(Long userId, Set<Long> roleIds) {
+        // 锁住超管角色这一行，串行化角色变更；否则两个并发降权可能都把“还有另一个超管”当真。
+        roleRepository.findByCodeForUpdate("SUPER_ADMIN")
+                .orElseThrow(() -> new IllegalStateException("缺少 SUPER_ADMIN 角色"));
         UserEntity user = require(userId);
         String before = roleCodes(user);
         Set<RoleEntity> roles = new HashSet<>();
         if (roleIds != null) {
             roles.addAll(roleRepository.findAllById(roleIds));
+        }
+        boolean superAdminBefore = user.getRoles().stream()
+                .anyMatch(role -> "SUPER_ADMIN".equals(role.getCode()));
+        boolean superAdminAfter = roles.stream()
+                .anyMatch(role -> "SUPER_ADMIN".equals(role.getCode()));
+        if (user.isActive() && superAdminBefore && !superAdminAfter
+                && userRepository.countActiveSuperAdmins() <= 1) {
+            throw new BizException("不能移除最后一个启用超管的 SUPER_ADMIN 角色");
         }
         user.getRoles().clear();
         user.getRoles().addAll(roles);
@@ -57,9 +69,18 @@ public class UserAdminService {
 
     @Transactional
     public void setStatus(Long userId, String status) {
+        roleRepository.findByCodeForUpdate("SUPER_ADMIN")
+                .orElseThrow(() -> new IllegalStateException("缺少 SUPER_ADMIN 角色"));
         UserEntity user = require(userId);
         if (!"ACTIVE".equals(status) && !"DISABLED".equals(status)) {
             throw new IllegalArgumentException("未知状态：" + status);
+        }
+        if ("DISABLED".equals(status) && user.isActive()) {
+            boolean isSuperAdmin = user.getRoles().stream()
+                    .anyMatch(role -> "SUPER_ADMIN".equals(role.getCode()));
+            if (isSuperAdmin && userRepository.countActiveSuperAdmins() <= 1) {
+                throw new BizException("不能禁用最后一个启用超管");
+            }
         }
         String before = user.getStatus();
         user.setStatus(status);

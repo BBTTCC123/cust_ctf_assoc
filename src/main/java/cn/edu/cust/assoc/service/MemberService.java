@@ -7,6 +7,7 @@ import cn.edu.cust.assoc.domain.Competitions;
 import cn.edu.cust.assoc.domain.PointsLedgerEntity;
 import cn.edu.cust.assoc.domain.PointsRequestEntity;
 import cn.edu.cust.assoc.domain.TeamAwardEntity;
+import cn.edu.cust.assoc.domain.TeamEntity;
 import cn.edu.cust.assoc.domain.UserEntity;
 import cn.edu.cust.assoc.dto.AbilityRadar;
 import cn.edu.cust.assoc.dto.LeaderboardRow;
@@ -18,6 +19,8 @@ import cn.edu.cust.assoc.repository.AwardShareRepository;
 import cn.edu.cust.assoc.repository.CompetitionRepository;
 import cn.edu.cust.assoc.repository.PointsRequestRepository;
 import cn.edu.cust.assoc.repository.TeamAwardRepository;
+import cn.edu.cust.assoc.repository.TeamMemberRepository;
+import cn.edu.cust.assoc.repository.TeamRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,12 +46,16 @@ public class MemberService {
     private final AwardShareRepository awardShareRepository;
     private final TeamAwardRepository teamAwardRepository;
     private final CompetitionRepository competitionRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final TeamRepository teamRepository;
 
     public MemberService(PointsService pointsService, PointsRequestRepository requestRepository,
                          UserDirectoryService userDirectory, MemberProfileService profileService,
                          AwardRepository awardRepository, AwardShareRepository awardShareRepository,
                          TeamAwardRepository teamAwardRepository,
-                         CompetitionRepository competitionRepository) {
+                         CompetitionRepository competitionRepository,
+                         TeamMemberRepository teamMemberRepository,
+                         TeamRepository teamRepository) {
         this.pointsService = pointsService;
         this.requestRepository = requestRepository;
         this.userDirectory = userDirectory;
@@ -57,6 +64,8 @@ public class MemberService {
         this.awardShareRepository = awardShareRepository;
         this.teamAwardRepository = teamAwardRepository;
         this.competitionRepository = competitionRepository;
+        this.teamMemberRepository = teamMemberRepository;
+        this.teamRepository = teamRepository;
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +89,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public MemberPointsView view(Long userId) {
+    public MemberPointsView view(Long userId, Long viewerId, boolean privilegedViewer) {
         UserEntity user = userDirectory.require(userId);
         List<PointsLedgerEntity> ledger = pointsService.ledgerOf(userId);
 
@@ -89,6 +98,8 @@ public class MemberService {
                 .stream()
                 .collect(Collectors.toMap(PointsRequestEntity::getId, PointsRequestEntity::getSourceType));
 
+        boolean detailsVisible = viewerId != null
+                && (viewerId.equals(userId) || privilegedViewer || isLeaderOf(userId, viewerId));
         List<MemberLedgerRow> rows = new ArrayList<>();
         Map<String, Integer> bySource = new LinkedHashMap<>();
         int total = 0;
@@ -99,8 +110,18 @@ public class MemberService {
             bySource.merge(sourceLabel(source), entry.getPoints(), Integer::sum);
             total += entry.getPoints();
         }
-        return new MemberPointsView(userId, user.getNickname(), total, bySource, rows,
-                profileService.publicView(userId).orElse(null), radarOf(userId));
+        return new MemberPointsView(userId, user.getNickname(), total, bySource,
+                detailsVisible ? rows : List.of(),
+                viewerId == null ? null : profileService.publicView(userId, true).orElse(null),
+                radarOf(userId), detailsVisible);
+    }
+
+    private boolean isLeaderOf(Long memberId, Long viewerId) {
+        return teamMemberRepository.findByUserIdAndLeftAtIsNull(memberId)
+                .flatMap(member -> teamRepository.findById(member.getTeamId()))
+                .filter(TeamEntity::isActive)
+                .map(team -> team.getLeaderId().equals(viewerId))
+                .orElse(false);
     }
 
     /** 六维能力雷达：个人获奖 + 团队奖份额，都按竞赛类别聚合。 */

@@ -67,20 +67,22 @@
         </li>
     </ul>
 
-    <h2>明细</h2>
-    <p th:if="${#lists.isEmpty(member.rows())}" class="lead">还没有积分记录。</p>
-    <table class="table" th:unless="${#lists.isEmpty(member.rows())}">
-        <thead><tr><th>归属月</th><th>发生日</th><th>来源</th><th>类型</th><th>分数</th></tr></thead>
-        <tbody>
-        <tr th:each="r : ${member.rows()}">
-            <td th:text="${r.periodMonth()}">2026-10</td>
-            <td th:text="${r.occurredOn()}">日期</td>
-            <td th:text="${r.sourceType()}">来源</td>
-            <td th:text="${r.entryType() == 'REVERSAL' ? '冲抵' : '入账'}">入账</td>
-            <td th:text="${r.points()}">0</td>
-        </tr>
-        </tbody>
-    </table>
+    <section th:if="${member.detailsVisible()}">
+        <h2>明细</h2>
+        <p th:if="${#lists.isEmpty(member.rows())}" class="lead">还没有积分记录。</p>
+        <table class="table" th:unless="${#lists.isEmpty(member.rows())}">
+            <thead><tr><th>归属月</th><th>发生日</th><th>来源</th><th>类型</th><th>分数</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${member.rows()}">
+                <td th:text="${r.periodMonth()}">2026-10</td>
+                <td th:text="${r.occurredOn()}">日期</td>
+                <td th:text="${r.sourceType()}">来源</td>
+                <td th:text="${r.entryType() == 'REVERSAL' ? '冲抵' : '入账'}">入账</td>
+                <td th:text="${r.points()}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.controller;
 
+import cn.edu.cust.assoc.common.BizException;
 import cn.edu.cust.assoc.dto.MemberProfileForm;
 import cn.edu.cust.assoc.security.CurrentUserService;
 import cn.edu.cust.assoc.service.MemberProfileService;
@@ -37,7 +38,7 @@ public class MyProfileController {
         try {
             profileService.save(currentUser.id(auth), form);
             redirect.addFlashAttribute("message", "资料已保存，公开页按隐私开关展示");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/me/profile";

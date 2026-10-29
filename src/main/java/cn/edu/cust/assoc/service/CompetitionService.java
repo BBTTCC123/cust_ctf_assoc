@@ -13,9 +13,11 @@ import java.util.List;
 public class CompetitionService {
 
     private final CompetitionRepository repository;
+    private final AuditService audit;
 
-    public CompetitionService(CompetitionRepository repository) {
+    public CompetitionService(CompetitionRepository repository, AuditService audit) {
         this.repository = repository;
+        this.audit = audit;
     }
 
     @Transactional(readOnly = true)
@@ -43,21 +45,28 @@ public class CompetitionService {
     public CompetitionEntity create(CompetitionForm form) {
         CompetitionEntity entity = new CompetitionEntity();
         apply(form, entity);
-        return repository.save(entity);
+        CompetitionEntity saved = repository.save(entity);
+        audit.record("COMPETITION_CREATE", "COMPETITION", saved.getId(), null, saved.getName());
+        return saved;
     }
 
     @Transactional
     public CompetitionEntity update(Long id, CompetitionForm form) {
         CompetitionEntity entity = get(id);
+        String before = entity.getName();
         apply(form, entity);
-        return repository.save(entity);
+        CompetitionEntity saved = repository.save(entity);
+        audit.record("COMPETITION_UPDATE", "COMPETITION", id, before, saved.getName());
+        return saved;
     }
 
     @Transactional
     public void delete(Long id) {
+        CompetitionEntity entity = get(id);
         try {
             repository.deleteById(id);
             repository.flush();
+            audit.record("COMPETITION_DELETE", "COMPETITION", id, entity.getName(), "DELETED");
         } catch (org.springframework.dao.DataIntegrityViolationException e) {
             throw new cn.edu.cust.assoc.common.BizException(
                     "这场比赛已经有关联奖项或积分记录，不能删除；请先处理关联数据");

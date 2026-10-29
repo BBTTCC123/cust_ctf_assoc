@@ -27,15 +27,17 @@ public class ArticleService {
     private final ArticleTagRepository tagRepository;
     private final MarkdownRenderer renderer;
     private final SensitiveWordService sensitiveWords;
+    private final MediaLinkService mediaLinks;
     private final AuditService audit;
 
     public ArticleService(ArticleRepository repository, ArticleTagRepository tagRepository,
                           MarkdownRenderer renderer, SensitiveWordService sensitiveWords,
-                          AuditService audit) {
+                          MediaLinkService mediaLinks, AuditService audit) {
         this.repository = repository;
         this.tagRepository = tagRepository;
         this.renderer = renderer;
         this.sensitiveWords = sensitiveWords;
+        this.mediaLinks = mediaLinks;
         this.audit = audit;
     }
 
@@ -43,7 +45,8 @@ public class ArticleService {
     @Transactional
     public ArticleEntity save(Long authorId, String title, String summary, String contentMd,
                               boolean involvesVuln, String requestedVisibility) {
-        return create(authorId, title, summary, contentMd, involvesVuln, requestedVisibility, null, true);
+        return create(authorId, title, summary, contentMd, involvesVuln,
+                requestedVisibility, null, null, true);
     }
 
     /**
@@ -53,7 +56,7 @@ public class ArticleService {
     @Transactional
     public ArticleEntity create(Long authorId, String title, String summary, String contentMd,
                                 boolean involvesVuln, String requestedVisibility,
-                                List<String> tags, boolean submit) {
+                                List<String> tags, Long coverMediaId, boolean submit) {
         String cleanTitle = requireText(title, "标题不能为空", 200);
         String cleanContent = requireText(contentMd, "正文不能为空", Integer.MAX_VALUE);
         String visibility = involvesVuln ? "INTERNAL"
@@ -75,6 +78,9 @@ public class ArticleService {
         article.setState(submit ? "PENDING" : "DRAFT");
         ArticleEntity saved = repository.save(article);
         replaceTags(saved.getId(), tags);
+        if (coverMediaId != null) {
+            mediaLinks.setSingle(MediaLinkService.ARTICLE_COVER, saved.getId(), coverMediaId);
+        }
         if (submit) {
             audit.record("ARTICLE_SUBMIT", "ARTICLE", saved.getId(), "DRAFT", "PENDING");
         }
@@ -85,7 +91,7 @@ public class ArticleService {
     @Transactional
     public ArticleEntity updateOwn(Long authorId, Long articleId, String title, String summary,
                                    String contentMd, boolean involvesVuln, String requestedVisibility,
-                                   List<String> tags) {
+                                   List<String> tags, Long coverMediaId) {
         ArticleEntity article = get(articleId);
         if (!article.getAuthorId().equals(authorId)) {
             throw new BizException("不能编辑别人的文章");
@@ -110,6 +116,8 @@ public class ArticleService {
         article.setRejectReason(null);
         ArticleEntity saved = repository.save(article);
         replaceTags(articleId, tags);
+        // null 表示移除封面；媒体存在性、审核态和内容更新在同一事务中完成。
+        mediaLinks.setSingle(MediaLinkService.ARTICLE_COVER, articleId, coverMediaId);
         return saved;
     }
 
@@ -122,6 +130,7 @@ public class ArticleService {
         if (!"DRAFT".equals(article.getState()) && !"REJECTED".equals(article.getState())) {
             throw new BizException("只有草稿或被驳回的文章才能提交审核");
         }
+        assertNoBlockedWords(article);
         article.setState("PENDING");
         article.setRejectReason(null);
         repository.save(article);
@@ -135,6 +144,7 @@ public class ArticleService {
         if (!"PENDING".equals(article.getState()) && !"OFFLINE".equals(article.getState())) {
             throw new BizException("只有待审或已下架的文章才能发布");
         }
+        assertNoBlockedWords(article);
         article.setState("PUBLISHED");
         article.setPublishedAt(LocalDateTime.now());
         article.setRejectReason(null);
@@ -182,6 +192,9 @@ public class ArticleService {
         ArticleEntity article = get(articleId);
         if (!article.getAuthorId().equals(authorId)) {
             throw new BizException("不能编辑别人的文章");
+        }
+        if (!"DRAFT".equals(article.getState()) && !"REJECTED".equals(article.getState())) {
+            throw new BizException("只有草稿或被驳回的文章才能编辑");
         }
         return article;
     }
@@ -271,6 +284,13 @@ public class ArticleService {
             throw new BizException("内容超过长度上限");
         }
         return text;
+    }
+
+    private void assertNoBlockedWords(ArticleEntity article) {
+        if (sensitiveWords.check(article.getTitle() + "\n" + article.getSummary() + "\n"
+                + article.getContentMd()) == SensitiveWordService.Result.BLOCK) {
+            throw new BizException("文章包含不允许发布的内容，请修改后再提交或发布");
+        }
     }
 
     private String trimToNull(String value, int max) {

@@ -48,7 +48,7 @@ class MemberPageTest {
                 Map.of("比赛奖", 42),
                 List.of(new MemberLedgerRow("2026-10", LocalDate.of(2026, 10, 20),
                         "比赛奖", "EARN", 42)),
-                null, radar);
+                null, radar, true);
 
         MockServletContext servletContext = new MockServletContext();
         JakartaServletWebApplication application =

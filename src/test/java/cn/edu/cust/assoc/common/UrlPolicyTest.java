@@ -34,6 +34,7 @@ class UrlPolicyTest {
     @DisplayName("图片不允许 mailto，协议相对地址也拒绝")
     void imageRules() {
         assertThat(UrlPolicy.sanitizeImage("https://example.com/a.png")).isEqualTo("https://example.com/a.png");
+        assertThat(UrlPolicy.sanitizeImage("http://example.com/a.png")).isEmpty();
         assertThat(UrlPolicy.sanitizeImage("/media/1")).isEqualTo("/media/1");
         assertThat(UrlPolicy.sanitizeImage("mailto:a@example.com")).isEmpty();
         assertThat(UrlPolicy.sanitizeLink("//evil.example.com")).isEmpty();

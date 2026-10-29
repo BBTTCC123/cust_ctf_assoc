@@ -1,6 +1,8 @@
 package cn.edu.cust.assoc.config;
 
 import cn.edu.cust.assoc.security.DbUserDetailsService;
+import cn.edu.cust.assoc.security.LoginAttemptService;
+import cn.edu.cust.assoc.security.LoginRateLimitFilter;
 import cn.edu.cust.assoc.security.MustChangePasswordFilter;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
@@ -26,7 +29,7 @@ public class SecurityConfig {
             "default-src 'self'",
             "script-src 'self'",
             "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data:",
+            "img-src 'self' data: https:",
             "font-src 'self'",
             "connect-src 'self'",
             "object-src 'none'",
@@ -51,7 +54,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, DbUserDetailsService userDetailsService)
+    public SecurityFilterChain filterChain(HttpSecurity http, DbUserDetailsService userDetailsService,
+                                           LoginAttemptService loginAttempts)
             throws Exception {
         http
             .userDetailsService(userDetailsService)
@@ -93,6 +97,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 // -1 = 不限制并发数，但要登记每个会话，禁用/降权时好统一踢下线
                 .maximumSessions(-1)
+                .expiredUrl("/login?expired")
                 .sessionRegistry(sessionRegistry()))
             .formLogin(form -> form
                 .loginPage("/login")
@@ -105,6 +110,8 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
             )
+            .addFilterBefore(new LoginRateLimitFilter(loginAttempts),
+                    UsernamePasswordAuthenticationFilter.class)
             // 登录成功还没改密的人，除了改密页哪都去不了
             .addFilterAfter(new MustChangePasswordFilter(), AuthorizationFilter.class);
         return http.build();

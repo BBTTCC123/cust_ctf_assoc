@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -35,6 +36,9 @@ class AuthenticationFlowIT extends IntegrationTestBase {
 
     @Autowired
     private RegistrationInviteRepository inviteRepository;
+
+    @Autowired
+    private SessionRegistry sessionRegistry;
 
     @Test
     void activeAccountCanLoginAndWrongPasswordIsRejected() throws Exception {
@@ -115,6 +119,27 @@ class AuthenticationFlowIT extends IntegrationTestBase {
 
         MockHttpSession freshSession = login(user.getUsername(), newPassword);
         getAs(freshSession, "/").andExpect(status().isOk());
+    }
+
+    @Test
+    void passwordChangeExpiresEveryOtherSession() throws Exception {
+        String oldPassword = "FirstPass!2026abc";
+        String newPassword = "SecondPass!2026abc";
+        UserEntity user = createActiveUser("multisession", oldPassword);
+        MockHttpSession first = login(user.getUsername(), oldPassword);
+        MockHttpSession second = login(user.getUsername(), oldPassword);
+
+        mockMvc.perform(post("/password/change").session(first).with(csrf())
+                        .param("currentPassword", oldPassword)
+                        .param("newPassword", newPassword)
+                        .param("confirmPassword", newPassword))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        assertThat(sessionRegistry.getSessionInformation(second.getId()).isExpired()).isTrue();
+        getAs(second, "/me")
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?expired"));
     }
 
     @Test

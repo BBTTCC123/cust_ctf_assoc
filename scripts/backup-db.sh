@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
 # 每日备份：数据库 dump + 上传目录 + 清单，打成一个加密包，再尝试复制到异地对象存储。
 set -Eeuo pipefail
+umask 077
 
 BACKUP_DIR=/var/backup
 UPLOAD_DIR=/srv/xyx
 STAMP=$(date +%Y%m%d-%H%M%S)
-WORK="$BACKUP_DIR/work-$STAMP"
+WORK=""
 OUT="$BACKUP_DIR/assoc-$STAMP.tar.gz.enc"
 CNF=/etc/xyx/my.cnf
 PASS_FILE=/etc/xyx/backup.pass
+
+cleanup() {
+  if [ -n "$WORK" ]; then
+    rm -rf -- "$WORK"
+  fi
+  rm -f -- "$BACKUP_DIR/assoc-$STAMP.tar.gz"
+}
+trap cleanup EXIT
 
 # 启动前预检：缺文件就明确报错，不要等到 mysqldump 才失败
 for f in "$CNF" "$PASS_FILE"; do
@@ -23,7 +32,8 @@ if ! mysql --defaults-extra-file="$CNF" -e 'SELECT 1' >/dev/null 2>&1; then
   exit 1
 fi
 
-mkdir -p "$WORK"
+mkdir -p "$BACKUP_DIR"
+WORK=$(mktemp -d "$BACKUP_DIR/work-$STAMP-XXXXXX")
 mysqldump --single-transaction --quick --defaults-extra-file="$CNF" \
   assoc_dev > "$WORK/assoc_dev.sql"
 
@@ -43,7 +53,6 @@ tar -C "$WORK" -czf "$BACKUP_DIR/assoc-$STAMP.tar.gz" .
 openssl enc -aes-256-cbc -pbkdf2 -pass file:"$PASS_FILE" \
   -in "$BACKUP_DIR/assoc-$STAMP.tar.gz" -out "$OUT"
 rm -f "$BACKUP_DIR/assoc-$STAMP.tar.gz"
-rm -rf "$WORK"
 
 # 本地只留 7 天；异地副本与版本控制的保留策略由对象存储生命周期负责
 find "$BACKUP_DIR" -name 'assoc-*.tar.gz.enc' -mtime +7 -delete

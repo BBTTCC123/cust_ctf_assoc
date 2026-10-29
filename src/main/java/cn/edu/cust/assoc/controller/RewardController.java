@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.controller;
 
+import cn.edu.cust.assoc.common.BizException;
 import cn.edu.cust.assoc.security.CurrentUserService;
 import cn.edu.cust.assoc.service.RewardService;
 import org.springframework.security.core.Authentication;
@@ -31,7 +32,7 @@ public class RewardController {
         try {
             rewardService.apply(currentUser.id(auth), itemId, note);
             redirect.addFlashAttribute("message", "兑换申请已提交，等积分管理员审核");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/rewards";
@@ -42,7 +43,7 @@ public class RewardController {
         try {
             rewardService.cancel(currentUser.id(auth), id);
             redirect.addFlashAttribute("message", "兑换申请已取消");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/rewards";

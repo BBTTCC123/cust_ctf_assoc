@@ -10,21 +10,26 @@
         <p class="lead">所有评论先审后发；敏感词命中的评论在提交时就会处理。</p>
         <p th:if="${message}" class="ok" th:text="${message}"></p>
         <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
-        <p th:if="${#lists.isEmpty(comments)}" class="lead">没有待审评论。</p>
+        <p th:if="${#lists.isEmpty(comments)}" class="lead">没有待审或已通过评论。</p>
         <table class="table" th:unless="${#lists.isEmpty(comments)}">
-            <thead><tr><th>文章</th><th>评论人</th><th>内容</th><th>时间</th><th></th></tr></thead>
+            <thead><tr><th>文章</th><th>评论人</th><th>内容</th><th>状态</th><th>时间</th><th></th></tr></thead>
             <tbody>
             <tr th:each="c : ${comments}">
                 <td><a th:href="@{/articles/{id}(id=${c.articleId()})}" target="_blank" th:text="${c.articleTitle()}">文章</a></td>
                 <td th:text="${c.nickname()}">成员</td>
                 <td th:text="${c.content()}">内容</td>
+                <td th:text="${c.state() == 'PENDING'} ? '待审核' : '已通过'">状态</td>
                 <td th:text="${#temporals.format(c.createdAt(),'yyyy-MM-dd HH:mm')}">时间</td>
                 <td class="actions">
-                    <form th:action="@{/admin/comments/{id}/approve(id=${c.id()})}" method="post" class="inline-form">
+                    <form th:if="${c.state() == 'PENDING'}" th:action="@{/admin/comments/{id}/approve(id=${c.id()})}" method="post" class="inline-form">
                         <button type="submit" class="link-btn">通过</button>
                     </form>
-                    <form th:action="@{/admin/comments/{id}/reject(id=${c.id()})}" method="post" class="inline-form">
+                    <form th:if="${c.state() == 'PENDING'}" th:action="@{/admin/comments/{id}/reject(id=${c.id()})}" method="post" class="inline-form">
                         <button type="submit" class="link-btn danger">驳回</button>
+                    </form>
+                    <form th:if="${c.state() == 'APPROVED'}" th:action="@{/admin/comments/{id}/revoke(id=${c.id()})}" method="post" class="inline-form"
+                          data-confirm="确认下架这条已通过的评论？">
+                        <button type="submit" class="link-btn danger">下架</button>
                     </form>
                 </td>
             </tr>

@@ -1,7 +1,7 @@
 package cn.edu.cust.assoc.controller;
 
 import cn.edu.cust.assoc.domain.CommentEntity;
-import cn.edu.cust.assoc.dto.PendingCommentRow;
+import cn.edu.cust.assoc.dto.CommentAdminRow;
 import cn.edu.cust.assoc.security.CurrentUserService;
 import cn.edu.cust.assoc.service.ArticleService;
 import cn.edu.cust.assoc.service.CommentService;
@@ -34,15 +34,16 @@ public class AdminCommentController {
 
     @GetMapping
     public String list(Model model) {
-        List<CommentEntity> pending = commentService.pending();
+        List<CommentEntity> pending = commentService.moderationQueue();
         Map<Long, String> names = userDirectory.nicknames(
                 pending.stream().map(CommentEntity::getUserId).toList());
         Map<Long, String> titles = articleService.titlesOf(
                 pending.stream().map(CommentEntity::getArticleId).distinct().toList());
-        List<PendingCommentRow> rows = pending.stream()
-                .map(c -> new PendingCommentRow(c.getId(), c.getArticleId(),
+        List<CommentAdminRow> rows = pending.stream()
+                .map(c -> new CommentAdminRow(c.getId(), c.getArticleId(),
                         titles.getOrDefault(c.getArticleId(), "文章 #" + c.getArticleId()),
-                        names.getOrDefault(c.getUserId(), "成员"), c.getContent(), c.getCreatedAt()))
+                        names.getOrDefault(c.getUserId(), "成员"), c.getContent(),
+                        c.getState(), c.getCreatedAt()))
                 .toList();
         model.addAttribute("comments", rows);
         return "admin/comments";
@@ -64,6 +65,17 @@ public class AdminCommentController {
         try {
             commentService.reject(id, currentUser.id(auth));
             redirect.addFlashAttribute("message", "评论已驳回");
+        } catch (RuntimeException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/comments";
+    }
+
+    @PostMapping("/{id}/revoke")
+    public String revoke(@PathVariable Long id, Authentication auth, RedirectAttributes redirect) {
+        try {
+            commentService.revoke(id, currentUser.id(auth));
+            redirect.addFlashAttribute("message", "评论已下架");
         } catch (RuntimeException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }

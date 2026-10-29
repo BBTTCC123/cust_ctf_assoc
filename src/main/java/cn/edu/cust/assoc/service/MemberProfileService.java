@@ -80,7 +80,10 @@ public class MemberProfileService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<ProfileView> publicView(Long userId) {
+    public Optional<ProfileView> publicView(Long userId, boolean authenticatedViewer) {
+        if (!authenticatedViewer) {
+            return Optional.empty();
+        }
         return repository.findByUserId(userId).map(e -> new ProfileView(
                 Boolean.TRUE.equals(e.getShowRealName()) ? e.getRealName() : null,
                 Boolean.TRUE.equals(e.getShowStudentNo()) ? e.getStudentNo() : null,
