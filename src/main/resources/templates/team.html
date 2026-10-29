@@ -3,88 +3,106 @@
 <head th:replace="~{fragments/layout :: head('战队详情')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <p class="crumb"><a th:href="@{/teams}">← 战队空间</a></p>
-    <div class="row-between">
-        <h1 th:text="${team.name()}">战队</h1>
-        <span class="tag warn" th:if="${team.status() == 'DISBANDED'}">已解散</span>
-        <span class="tag" th:if="${team.status() == 'ACTIVE'}">在队</span>
-    </div>
-    <p class="lead">队长 <a th:href="@{/members/{id}(id=${team.leaderId()})}"
-                          th:text="${team.leaderName()}">成员</a>
-        · 创建于 <span th:text="${team.createdAt()}">日期</span></p>
-    <p th:if="${message}" class="ok" th:text="${message}"></p>
-    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
-
-    <section th:if="${team.intro() != null}">
-        <h2>战队简介</h2>
-        <p th:text="${team.intro()}">简介</p>
-    </section>
-
-    <section>
-        <h2>在队成员（<span th:text="${#lists.size(team.members())}">0</span>）</h2>
-        <p th:if="${#lists.isEmpty(team.members())}" class="lead">当前没有在队成员。</p>
-        <table class="table" th:unless="${#lists.isEmpty(team.members())}">
-            <thead><tr><th>成员</th><th>入队时间</th><th>身份</th><th th:if="${isLeader}">操作</th></tr></thead>
-            <tbody>
-            <tr th:each="m : ${team.members()}">
-                <td><a th:href="@{/members/{id}(id=${m.userId()})}" th:text="${m.nickname()}">成员</a></td>
-                <td th:text="${m.joinedAt()}">时间</td>
-                <td>
-                    <span class="tag" th:if="${m.leader()}">队长</span>
-                    <span th:unless="${m.leader()}" class="hint">队员</span>
-                </td>
-                <td th:if="${isLeader}" class="actions">
-                    <form th:if="${!m.leader()}" th:action="@{/teams/{id}/members/{uid}/remove(id=${team.id()},uid=${m.userId()})}"
-                          method="post" class="inline-form" data-confirm="确定把这个成员移出战队？">
-                        <button type="submit" class="link-btn danger">移出</button>
-                    </form>
-                    <form th:if="${!m.leader()}" th:action="@{/teams/{id}/leader(id=${team.id()})}"
-                          method="post" class="inline-form" data-confirm="确定把队长转给该成员？">
-                        <input type="hidden" name="userId" th:value="${m.userId()}">
-                        <button type="submit" class="link-btn">转让队长</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </section>
-
-    <section th:if="${isLeader}">
-        <h2>队长管理</h2>
-        <h3>添加成员</h3>
-        <p class="hint">输入对方的登录用户名（不是昵称）。对方同一时间只能在一支战队里。</p>
-        <form th:action="@{/teams/{id}/members(id=${team.id()})}" method="post" class="inline-grid">
-            <input type="text" name="username" placeholder="登录用户名" required maxlength="64">
-            <button type="submit" class="btn">加入战队</button>
-        </form>
-
-        <h3>编辑简介</h3>
-        <form th:action="@{/teams/{id}/intro(id=${team.id()})}" method="post" class="form-grid single">
-            <label>战队简介
-                <textarea name="intro" rows="4" maxlength="500"
-                          th:text="${team.intro()}">简介</textarea>
-            </label>
-            <div class="form-actions">
-                <button type="submit" class="btn">保存简介</button>
+<main>
+    <section class="page-hero">
+        <div class="page-hero-inner">
+            <div class="page-hero-copy">
+                <p class="crumb" style="margin-bottom:10px;"><a th:href="@{/teams}" style="color:#8fd4ff;">← 战队空间</a></p>
+                <p class="eyebrow">CUST · TEAM</p>
+                <h1 th:text="${team.name()}">战队</h1>
+                <p class="lead">队长 <a th:href="@{/members/{id}(id=${team.leaderId()})}" style="color:#9fdcff;" th:text="${team.leaderName()}">成员</a>
+                    · 创建于 <span th:text="${team.createdAt()}">日期</span></p>
+                <p style="margin-top:10px;">
+                    <span class="tag" th:if="${team.status() == 'DISBANDED'}">已解散</span>
+                    <span class="tag ok" th:if="${team.status() == 'ACTIVE'}">在队</span>
+                </p>
             </div>
-        </form>
-
-        <h3>解散战队</h3>
-        <p class="hint">解散后全部成员自动离队，战队名不可再使用。此操作会写入审计日志。</p>
-        <form th:action="@{/teams/{id}/disband(id=${team.id()})}" method="post"
-              data-confirm="确定解散这个战队？所有成员会离队。">
-            <button type="submit" class="btn danger-btn">解散战队</button>
-        </form>
+            <div class="page-hero-mark" aria-hidden="true"><img th:src="@{/images/logo.webp}" alt=""></div>
+        </div>
     </section>
+    <div class="container">
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
 
-    <section th:if="${isMember and !isLeader and team.status() == 'ACTIVE'}">
-        <h2>退出战队</h2>
-        <form th:action="@{/teams/{id}/leave(id=${team.id()})}" method="post"
-              data-confirm="确定退出这个战队？">
-            <button type="submit" class="btn danger-btn">退出战队</button>
-        </form>
-    </section>
+        <section class="section" th:if="${team.intro() != null}">
+            <div class="panel">
+                <p class="eyebrow">ABOUT</p>
+                <h2 style="margin-top:6px;">战队简介</h2>
+                <p style="margin-top:8px;color:var(--ink-2);" th:text="${team.intro()}">简介</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-head"><div><p class="eyebrow">ROSTER</p><h2>在队成员 · <span th:text="${#lists.size(team.members())}">0</span></h2></div></div>
+            <p th:if="${#lists.isEmpty(team.members())}" class="lead">当前没有在队成员。</p>
+            <div class="panel" th:unless="${#lists.isEmpty(team.members())}" style="padding:0;overflow:hidden;">
+                <table class="table" style="border:0;">
+                    <thead><tr><th>成员</th><th>入队时间</th><th>身份</th><th th:if="${isLeader}">操作</th></tr></thead>
+                    <tbody>
+                    <tr th:each="m : ${team.members()}">
+                        <td><a th:href="@{/members/{id}(id=${m.userId()})}" th:text="${m.nickname()}">成员</a></td>
+                        <td th:text="${m.joinedAt()}">时间</td>
+                        <td><span class="tag" th:if="${m.leader()}">队长</span><span th:unless="${m.leader()}" class="hint">队员</span></td>
+                        <td th:if="${isLeader}" class="actions">
+                            <form th:if="${!m.leader()}" th:action="@{/teams/{id}/members/{uid}/remove(id=${team.id()},uid=${m.userId()})}"
+                                  method="post" class="inline-form" data-confirm="确定把这个成员移出战队？">
+                                <button type="submit" class="link-btn danger">移出</button>
+                            </form>
+                            <form th:if="${!m.leader()}" th:action="@{/teams/{id}/leader(id=${team.id()})}"
+                                  method="post" class="inline-form" data-confirm="确定把队长转给该成员？">
+                                <input type="hidden" name="userId" th:value="${m.userId()}">
+                                <button type="submit" class="link-btn">转让队长</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section" th:if="${isLeader}">
+            <div class="grid-2">
+                <div class="panel">
+                    <p class="eyebrow">MANAGE</p>
+                    <h2>添加成员</h2>
+                    <p class="hint">输入对方的登录用户名（不是昵称）。对方同一时间只能在一支战队里。</p>
+                    <form th:action="@{/teams/{id}/members(id=${team.id()})}" method="post" class="inline-grid">
+                        <input type="text" name="username" placeholder="登录用户名" required maxlength="64">
+                        <button type="submit" class="btn">加入战队</button>
+                    </form>
+                </div>
+                <div class="panel">
+                    <p class="eyebrow">INTRO</p>
+                    <h2>编辑简介</h2>
+                    <form th:action="@{/teams/{id}/intro(id=${team.id()})}" method="post" class="form-grid single">
+                        <label>战队简介
+                            <textarea name="intro" rows="4" maxlength="500" th:text="${team.intro()}">简介</textarea>
+                        </label>
+                        <div class="form-actions"><button type="submit" class="btn">保存简介</button></div>
+                    </form>
+                </div>
+            </div>
+            <div class="panel" style="margin-top:16px;border-color:#f0d4d1;">
+                <p class="eyebrow" style="color:var(--danger);">DANGER ZONE</p>
+                <h2 style="margin-top:6px;">解散战队</h2>
+                <p class="hint">解散后全部成员自动离队，战队名不可再使用。此操作会写入审计日志。</p>
+                <form th:action="@{/teams/{id}/disband(id=${team.id()})}" method="post"
+                      data-confirm="确定解散这个战队？所有成员会离队。">
+                    <button type="submit" class="btn danger-btn">解散战队</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="section" th:if="${isMember and !isLeader and team.status() == 'ACTIVE'}">
+            <div class="panel">
+                <h2>退出战队</h2>
+                <form th:action="@{/teams/{id}/leave(id=${team.id()})}" method="post"
+                      data-confirm="确定退出这个战队？">
+                    <button type="submit" class="btn danger-btn">退出战队</button>
+                </form>
+            </div>
+        </section>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

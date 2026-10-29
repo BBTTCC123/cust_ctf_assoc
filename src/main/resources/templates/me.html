@@ -3,36 +3,57 @@
 <head th:replace="~{fragments/layout :: head('我的积分')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <h1>我的积分</h1>
-    <p class="lead">总计 <strong th:text="${total}">0</strong> 分
-        · <a th:href="@{/members/{id}(id=${memberId})}">我的公开积分页</a>
-        · <a th:href="@{/me/profile}">我的资料</a>
-        · <a th:href="@{/me/articles}">我的文章</a>
-        · <a th:href="@{/me/favorites}">我的收藏</a>
-    </p>
-    <p th:if="${message}" class="ok" th:text="${message}"></p>
-    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
-    <p th:if="${#lists.isEmpty(ledger)}" class="lead">还没有积分记录。</p>
-    <table class="table" th:unless="${#lists.isEmpty(ledger)}">
-        <thead><tr><th>归属月</th><th>发生日</th><th>类型</th><th>分数</th><th>备注</th><th></th></tr></thead>
-        <tbody>
-        <tr th:each="l : ${ledger}">
-            <td th:text="${l.periodMonth()}">2026-10</td>
-            <td th:text="${l.occurredOn()}">日期</td>
-            <td th:text="${l.entryType() == 'REVERSAL'} ? '冲抵' : '入账'">EARN</td>
-            <td th:text="${l.points()}">0</td>
-            <td th:text="${l.note()} ?: '—'">—</td>
-            <td>
-                <form th:if="${l.entryType() == 'EARN'}" th:action="@{/me/appeal}" method="post" class="inline-form">
-                    <input type="hidden" name="ledgerId" th:value="${l.id()}">
-                    <input type="text" name="reason" placeholder="申诉理由" required maxlength="500">
-                    <button type="submit" class="link-btn">申诉</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<main>
+    <section class="page-hero">
+        <div class="page-hero-inner">
+            <div class="page-hero-copy">
+                <p class="eyebrow">MEMBER CENTER</p>
+                <h1>我的积分</h1>
+                <p class="lead">每一笔加分、冲抵和归属月都在这里；有疑问可以直接发起申诉。</p>
+            </div>
+            <div class="page-hero-mark" aria-hidden="true"><img th:src="@{/images/logo.webp}" alt=""></div>
+        </div>
+    </section>
+    <div class="container">
+        <div class="grid-4">
+            <div class="stat"><b th:text="${total}">0</b><span>当前总积分</span></div>
+            <a class="stat" th:href="@{/members/{id}(id=${memberId})}" style="display:block;"><b>公开页</b><span>我的积分构成</span></a>
+            <a class="stat" th:href="@{/me/profile}" style="display:block;"><b>资料</b><span>隐私与公开字段</span></a>
+            <a class="stat" th:href="@{/me/articles}" style="display:block;"><b>文章</b><span>草稿与投稿</span></a>
+        </div>
+
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+        <section class="section">
+            <div class="section-head">
+                <div><p class="eyebrow">MY LEDGER</p><h2>积分流水</h2></div>
+                <a class="more" th:href="@{/me/favorites}">我的收藏</a>
+            </div>
+            <p th:if="${#lists.isEmpty(ledger)}" class="lead">还没有积分记录。</p>
+            <div class="panel" th:unless="${#lists.isEmpty(ledger)}" style="padding:0;overflow:hidden;">
+                <table class="table" style="border:0;">
+                    <thead><tr><th>归属月</th><th>发生日</th><th>类型</th><th>分数</th><th>备注</th><th>申诉</th></tr></thead>
+                    <tbody>
+                    <tr th:each="l : ${ledger}">
+                        <td th:text="${l.periodMonth()}">2026-10</td>
+                        <td th:text="${l.occurredOn()}">日期</td>
+                        <td><span class="tag" th:classappend="${l.entryType() == 'REVERSAL'} ? 'danger'" th:text="${l.entryType() == 'REVERSAL' ? '冲抵' : '入账'}">入账</span></td>
+                        <td th:text="${l.points()}">0</td>
+                        <td th:text="${l.note()} ?: '—'">—</td>
+                        <td>
+                            <form th:if="${l.entryType() == 'EARN'}" th:action="@{/me/appeal}" method="post" class="inline-form">
+                                <input type="hidden" name="ledgerId" th:value="${l.id()}">
+                                <input type="text" name="reason" placeholder="申诉理由" required maxlength="500">
+                                <button type="submit" class="link-btn">申诉</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

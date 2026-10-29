@@ -4,60 +4,77 @@
 <head th:replace="~{fragments/layout :: head(${article.title()})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <p class="crumb"><a th:href="@{/articles}">← 技术空间</a></p>
-    <h1 th:text="${article.title()}">标题</h1>
-    <p class="muted" th:text="${article.publishedAt() == null ? article.authorName() : article.authorName() + ' · ' + #temporals.format(article.publishedAt(),'yyyy-MM-dd')}">作者</p>
-    <p class="tag-row">
-        <span class="tag" th:each="t : ${article.tags()}" th:text="${t}">标签</span>
-        <span class="tag" th:text="${article.visibility() == 'PUBLIC'} ? '公开' : '站内'">站内</span>
-        <span class="tag warn" th:if="${article.involvesVuln()}">涉漏洞点</span>
-    </p>
-    <p th:if="${message}" class="ok" th:text="${message}"></p>
-    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
-
-    <img th:if="${article.coverMediaId() != null}" class="article-cover"
-         th:src="@{/media/{id}(id=${article.coverMediaId()})}" th:alt="${article.title()}">
-
-    <p class="lead" th:if="${article.summary()}" th:text="${article.summary()}">摘要</p>
-    <div class="markdown-body" th:utext="${article.contentHtml()}">正文</div>
-    <p class="hint">本文仅用于学习交流，禁止用于任何未授权测试。</p>
-
-    <div class="article-actions">
-        <a th:if="${article.canEdit()}" th:href="@{/me/articles/{id}/edit(id=${article.id()})}">编辑我的文章</a>
-        <form sec:authorize="isAuthenticated()" th:action="@{/articles/{id}/favorite(id=${article.id()})}"
-              method="post" class="inline-form">
-            <button type="submit" class="link-btn"
-                    th:text="${article.favorited()} ? '取消收藏' : '收藏'">收藏</button>
-        </form>
-        <span sec:authorize="!isAuthenticated()" class="hint">
-            <a th:href="@{/login}">登录</a>后可收藏和评论
-        </span>
-    </div>
-
-    <section class="comments">
-        <h2>评论</h2>
-        <p th:if="${#lists.isEmpty(article.comments())}" class="lead">还没有评论。</p>
-        <ul class="comment-list" th:unless="${#lists.isEmpty(article.comments())}">
-            <li th:each="c : ${article.comments()}">
-                <p class="meta">
-                    <strong th:text="${c.nickname()}">成员</strong>
-                    <span class="muted" th:text="${#temporals.format(c.createdAt(),'yyyy-MM-dd HH:mm')}">时间</span>
+<main>
+    <section class="page-hero">
+        <div class="page-hero-inner">
+            <div class="page-hero-copy">
+                <p class="crumb" style="margin-bottom:10px;"><a th:href="@{/articles}" style="color:#8fd4ff;">← 技术空间</a></p>
+                <p class="eyebrow">TECH NOTE · <span th:text="${article.visibility() == 'PUBLIC' ? 'PUBLIC' : 'MEMBER ONLY'}">PUBLIC</span></p>
+                <h1 th:text="${article.title()}">标题</h1>
+                <p class="lead" th:if="${article.summary()}" th:text="${article.summary()}">摘要</p>
+                <p class="hint" style="color:#9fc4e8;margin-top:10px;"
+                   th:text="${article.publishedAt() == null ? article.authorName() : article.authorName() + ' · ' + #temporals.format(article.publishedAt(),'yyyy-MM-dd')}">作者</p>
+                <p class="tag-row">
+                    <span class="tag" th:each="t : ${article.tags()}" th:text="${t}">标签</span>
+                    <span class="tag warn" th:if="${article.involvesVuln()}">涉漏洞点 · 仅站内</span>
                 </p>
-                <p th:text="${c.content()}">评论内容</p>
-            </li>
-        </ul>
-        <form sec:authorize="isAuthenticated()" th:action="@{/articles/{id}/comments(id=${article.id()})}"
-              method="post" class="form-grid single">
-            <label>写评论（先审后发）
-                <textarea name="content" rows="4" required maxlength="1000"></textarea>
-            </label>
-            <div class="form-actions"><button type="submit" class="btn">提交评论</button></div>
-        </form>
-        <p sec:authorize="!isAuthenticated()" class="hint">
-            <a th:href="@{/login}">登录</a>后参与评论。
-        </p>
+            </div>
+            <div class="page-hero-mark" aria-hidden="true"><img th:src="@{/images/logo.webp}" alt=""></div>
+        </div>
     </section>
+
+    <div class="container">
+        <article class="article-page">
+            <p th:if="${message}" class="ok" th:text="${message}"></p>
+            <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+            <img th:if="${article.coverMediaId() != null}" class="article-cover"
+                 th:src="@{/media/{id}(id=${article.coverMediaId()})}" th:alt="${article.title()}">
+
+            <div class="panel" style="padding:clamp(22px,4vw,42px);">
+                <div class="markdown-body" th:utext="${article.contentHtml()}">正文</div>
+                <p class="hint" style="margin-top:24px;padding-top:14px;border-top:1px solid var(--line);">本文仅用于学习交流，禁止用于任何未授权测试。</p>
+            </div>
+
+            <div class="article-actions">
+                <a th:if="${article.canEdit()}" class="btn ghost small" th:href="@{/me/articles/{id}/edit(id=${article.id()})}">编辑我的文章</a>
+                <form sec:authorize="isAuthenticated()" th:action="@{/articles/{id}/favorite(id=${article.id()})}"
+                      method="post" class="inline-form">
+                    <button type="submit" class="btn soft small"
+                            th:text="${article.favorited()} ? '取消收藏' : '收藏文章'">收藏</button>
+                </form>
+                <span sec:authorize="!isAuthenticated()" class="hint">
+                    <a th:href="@{/login}">登录</a>后可收藏和评论
+                </span>
+            </div>
+
+            <section class="comments">
+                <div class="section-head">
+                    <div><p class="eyebrow">DISCUSS</p><h2>评论 · <span th:text="${#lists.size(article.comments())}">0</span></h2></div>
+                </div>
+                <p th:if="${#lists.isEmpty(article.comments())}" class="lead">还没有评论。</p>
+                <ul class="comment-list" th:unless="${#lists.isEmpty(article.comments())}">
+                    <li th:each="c : ${article.comments()}">
+                        <p class="meta">
+                            <strong th:text="${c.nickname()}">成员</strong>
+                            <span class="muted" th:text="${#temporals.format(c.createdAt(),'yyyy-MM-dd HH:mm')}">时间</span>
+                        </p>
+                        <p th:text="${c.content()}">评论内容</p>
+                    </li>
+                </ul>
+                <form sec:authorize="isAuthenticated()" th:action="@{/articles/{id}/comments(id=${article.id()})}"
+                      method="post" class="form-grid single" style="margin-top:18px;">
+                    <label>写评论（先审后发）
+                        <textarea name="content" rows="4" required maxlength="1000" placeholder="说说你的看法……"></textarea>
+                    </label>
+                    <div class="form-actions"><button type="submit" class="btn">提交评论</button></div>
+                </form>
+                <p sec:authorize="!isAuthenticated()" class="hint" style="margin-top:14px;">
+                    <a th:href="@{/login}">登录</a>后参与评论。
+                </p>
+            </section>
+        </article>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

@@ -3,49 +3,141 @@
 <head th:replace="~{fragments/layout :: head('首页')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <section class="hero">
-        <h1 th:text="${greeting}">网络攻防协会</h1>
-        <p class="lead">成绩、积分、技术文章，都留在这里，不再散在聊天记录里。</p>
-        <p class="hero-actions">
-            <a class="btn" th:href="@{/competitions}">看竞赛档案</a>
-            <a class="btn ghost" th:href="@{/join}">加入我们</a>
-        </p>
+<main>
+    <section class="home-hero">
+        <div class="home-hero-inner">
+            <div class="home-hero-copy">
+                <p class="home-kicker">CUST · NETWORK ATTACK &amp; DEFENSE</p>
+                <h1>以攻促防，<br>把每一次<em>实战</em>留下来。</h1>
+                <p class="lead">CUST 网络攻防协会的官方档案库：竞赛战绩、积分成长、技术文章与战队协作，都收在这里，不再散落在聊天记录里。</p>
+                <div class="hero-actions">
+                    <a class="btn" th:href="@{/competitions}">浏览竞赛档案</a>
+                    <a class="btn ghost" th:href="@{/join}">加入我们</a>
+                </div>
+                <div class="hero-tags" aria-label="站点关键词">
+                    <span>竞赛档案</span>
+                    <span>积分体系</span>
+                    <span>技术空间</span>
+                    <span>战队协作</span>
+                </div>
+            </div>
+            <div class="hero-emblem-wrap" aria-hidden="true">
+                <div class="hero-emblem-stage">
+                    <span class="emblem-ring"></span>
+                    <div class="hero-emblem">
+                        <img th:src="@{/images/logo.webp}" alt="">
+                    </div>
+                </div>
+                <span class="hero-emblem-caption">EST. CUST · CTF ASSOCIATION</span>
+            </div>
+        </div>
     </section>
 
-    <section>
-        <h2>最新公告</h2>
-        <p th:if="${#lists.isEmpty(announcements)}" class="lead">暂无公告。</p>
-        <ul class="article-list">
-            <li th:each="a : ${announcements}">
-                <a th:href="@{/announcements/{id}(id=${a.id})}" th:text="${a.title}">公告</a>
-                <span class="muted" th:text="${#temporals.format(a.publishedAt,'yyyy-MM-dd')}">日期</span>
-            </li>
-        </ul>
-    </section>
+    <div class="container">
+        <section class="section">
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="eyebrow">LATEST</p>
+                            <h2>最新公告</h2>
+                        </div>
+                        <a class="more" th:href="@{/announcements}">全部公告</a>
+                    </div>
+                    <p th:if="${#lists.isEmpty(announcements)}" class="lead">暂无公告，新的活动会在这里发布。</p>
+                    <div class="feed" th:unless="${#lists.isEmpty(announcements)}">
+                        <a class="feed-item" th:each="a : ${announcements}"
+                           th:href="@{/announcements/{id}(id=${a.id})}">
+                            <span class="feed-date">
+                                <strong th:text="${#temporals.format(a.publishedAt,'dd')}">28</strong>
+                                <span th:text="${#temporals.format(a.publishedAt,'MM月')}">10月</span>
+                            </span>
+                            <span class="feed-title" th:text="${a.title}">公告标题</span>
+                            <span class="feed-arrow">↗</span>
+                        </a>
+                    </div>
+                </div>
 
-    <section>
-        <h2>最近荣誉</h2>
-        <p th:if="${#lists.isEmpty(honors)}" class="lead">暂无记录。</p>
-        <ul class="honor-list">
-            <li th:each="h : ${honors}">
-                <span class="year" th:text="${h.year}">2025</span>
-                <div><strong th:text="${h.title}">荣誉</strong></div>
-            </li>
-        </ul>
-    </section>
+                <div class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="eyebrow">HONORS</p>
+                            <h2>最近荣誉</h2>
+                        </div>
+                        <a class="more" th:href="@{/honors}">荣誉墙</a>
+                    </div>
+                    <p th:if="${#lists.isEmpty(honors)}" class="lead">还没有记录。</p>
+                    <ul class="honor-list" th:unless="${#lists.isEmpty(honors)}">
+                        <li th:each="h : ${honors}">
+                            <span class="year" th:text="${h.year}">2025</span>
+                            <div>
+                                <strong th:text="${h.title}">荣誉名称</strong>
+                                <p th:if="${h.description}" th:text="${h.description}">说明</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-    <section>
-        <h2>积分前三</h2>
-        <p th:if="${#lists.isEmpty(topPoints)}" class="lead">还没有积分记录。</p>
-        <ol class="top3">
-            <li th:each="row : ${topPoints}">
-                <a th:href="@{/members/{id}(id=${row.userId})}" th:text="${row.nickname}">成员</a>
-                <strong th:text="${row.total} + ' 分'">0 分</strong>
-            </li>
-        </ol>
-        <p><a th:href="@{/points}">看完整积分榜</a></p>
-    </section>
+        <section class="section">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">LEADERBOARD</p>
+                    <h2>积分榜 · 本赛季前列</h2>
+                </div>
+                <a class="more" th:href="@{/points}">查看完整榜单</a>
+            </div>
+            <p th:if="${#lists.isEmpty(topPoints)}" class="lead">还没有积分记录，第一笔成绩等你来写。</p>
+            <div class="podium" th:unless="${#lists.isEmpty(topPoints)}">
+                <article class="podium-card" th:each="row, s : ${topPoints}">
+                    <span class="podium-rank" th:text="${s.index == 0 ? 'RANK 01' : (s.index == 1 ? 'RANK 02' : 'RANK 03')}">RANK 01</span>
+                    <a class="podium-name" th:href="@{/members/{id}(id=${row.userId})}" th:text="${row.nickname}">成员</a>
+                    <p class="podium-score"><strong th:text="${row.total}">0</strong> 分</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">THE ASSOCIATION</p>
+                    <h2>从一场比赛，到一整套成长档案</h2>
+                </div>
+            </div>
+            <div class="feature-links">
+                <a class="feature-link" th:href="@{/competitions}">
+                    <small>01 / ARCHIVE</small>
+                    <strong>竞赛档案</strong>
+                    <p>每一场比赛、每一位参赛成员、每一个奖项和现场照片。</p>
+                    <span class="arrow">进入档案 →</span>
+                </a>
+                <a class="feature-link" th:href="@{/points}">
+                    <small>02 / POINTS</small>
+                    <strong>积分体系</strong>
+                    <p>比赛奖、挖洞、护网统一入账；总榜、年榜、季榜、月榜可追溯。</p>
+                    <span class="arrow">查看积分榜 →</span>
+                </a>
+                <a class="feature-link" th:href="@{/articles}">
+                    <small>03 / TECH</small>
+                    <strong>技术空间</strong>
+                    <p>把踩过的坑、写过的工具和打过的靶场留下来，给下一届。</p>
+                    <span class="arrow">进入技术空间 →</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="panel" style="display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;background:linear-gradient(120deg,#071c36,#0b3d75);color:#fff;border-color:transparent;">
+                <div>
+                    <p class="eyebrow" style="color:#8fd4ff;">JOIN THE TEAM</p>
+                    <h2 style="margin-top:8px;font-family:var(--font-display);font-size:1.55rem;">下一场比赛，想和你一起打。</h2>
+                    <p style="color:#b9d6f3;margin-top:6px;font-size:13px;">填一张报名表，我们会联系你。无需注册账号。</p>
+                </div>
+                <a class="btn" style="background:#fff;color:#0a4a9a;box-shadow:none;" th:href="@{/join}">提交报名</a>
+            </div>
+        </section>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

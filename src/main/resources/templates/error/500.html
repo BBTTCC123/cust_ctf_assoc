@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>出错了</title></head>
-<body style="font-family: system-ui; text-align: center; padding: 80px 20px;">
-<h1 style="font-size: 3rem; margin: 0;">500</h1>
-<p>服务出了点问题，已经记下来了。回<a th:href="@{/}">首页</a>再试。</p>
-<p th:if="${requestId}" style="color:#616e7c;font-size:.85rem;"
-   th:text="'错误编号：' + ${requestId}">错误编号</p>
+<head th:replace="~{fragments/layout :: head('服务异常')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="error-page">
+    <p class="error-code">500 / SERVER ERROR</p>
+    <h1>服务出了点问题。</h1>
+    <p>已经记录下来了。请稍后重试，或回首页继续浏览。</p>
+    <p class="hint" th:if="${requestId}" th:text="'错误编号：' + ${requestId}">错误编号</p>
+    <p style="margin-top:18px;"><a class="btn" th:href="@{/}">回首页</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

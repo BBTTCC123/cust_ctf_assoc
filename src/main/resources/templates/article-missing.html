@@ -3,10 +3,11 @@
 <head th:replace="~{fragments/layout :: head('看不到')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <h1>看不到这篇</h1>
-    <p class="lead" th:text="${message}">原因</p>
-    <p><a th:href="@{/articles}">回技术空间</a></p>
+<main class="error-page">
+    <p class="error-code">ARTICLE / UNAVAILABLE</p>
+    <h1>看不到这篇。</h1>
+    <p th:text="${message}">原因</p>
+    <p style="margin-top:18px;"><a class="btn" th:href="@{/articles}">回技术空间</a></p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

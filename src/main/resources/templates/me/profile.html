@@ -3,47 +3,54 @@
 <head th:replace="~{fragments/layout :: head('我的资料')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <div class="row-between">
-        <h1>我的资料</h1>
-        <a class="btn ghost" th:href="@{/me}">我的积分</a>
-    </div>
-    <p class="lead">游客只能看到昵称、成绩汇总和能力图；登录用户可看学院、专业、年级及你主动公开的字段。完整积分明细仅本人、队长、积分管理员和教师可见。</p>
-    <p th:if="${message}" class="ok" th:text="${message}"></p>
-    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+<main>
+    <section th:replace="~{fragments/layout :: pageHero('MEMBER · PROFILE','我的资料','游客只能看到昵称、成绩汇总和能力图；登录用户可看学院、专业、年级及你主动公开的字段。')}"></section>
+    <div class="container">
+        <div class="row-between" style="margin-bottom:16px;">
+            <p class="hint" style="margin:0;">完整积分明细仅本人、队长、积分管理员和教师可见。</p>
+            <a class="btn ghost" th:href="@{/me}">我的积分</a>
+        </div>
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
 
-    <form th:action="@{/me/profile}" method="post" th:object="${form}" class="form-grid">
-        <label>真实姓名
-            <input type="text" th:field="*{realName}" maxlength="64" required>
-            <span class="privacy"><input type="checkbox" th:field="*{showRealName}"> 公开页显示</span>
-        </label>
-        <label>学号（可空）
-            <input type="text" th:field="*{studentNo}" pattern="\d{6,20}" maxlength="32">
-            <span class="privacy"><input type="checkbox" th:field="*{showStudentNo}"> 公开页显示</span>
-        </label>
-        <label>学院
-            <input type="text" th:field="*{college}" maxlength="128" required>
-        </label>
-        <label>专业
-            <input type="text" th:field="*{major}" maxlength="128" required>
-        </label>
-        <label>年级
-            <input type="text" th:field="*{grade}" maxlength="32" required placeholder="如 2024 级">
-        </label>
-        <label>手机（可空）
-            <input type="text" th:field="*{phone}" maxlength="32">
-            <span class="privacy"><input type="checkbox" th:field="*{showPhone}"> 公开页显示</span>
-        </label>
-        <label>邮箱（可空）
-            <input type="text" th:field="*{email}" maxlength="254">
-            <span class="privacy"><input type="checkbox" th:field="*{showEmail}"> 公开页显示</span>
-        </label>
-        <label>博客 / 主页（可空）
-            <input type="text" th:field="*{blog}" maxlength="2048" placeholder="https://...">
-            <span class="privacy"><input type="checkbox" th:field="*{showBlog}"> 公开页显示</span>
-        </label>
-        <div class="form-actions"><button type="submit" class="btn">保存资料</button></div>
-    </form>
+        <div class="panel" style="max-width:960px;">
+            <p class="eyebrow">PUBLIC PROFILE</p>
+            <h2 style="margin-top:6px;">资料与隐私开关</h2>
+            <p class="lead">每个“公开页显示”只控制对应字段；不勾选就不会出现在公开成员页。</p>
+            <form th:action="@{/me/profile}" method="post" th:object="${form}" class="form-grid">
+                <label>真实姓名
+                    <input type="text" th:field="*{realName}" maxlength="64" required>
+                    <span class="privacy"><input type="checkbox" th:field="*{showRealName}"> 公开页显示</span>
+                </label>
+                <label>学号（可空）
+                    <input type="text" th:field="*{studentNo}" pattern="\d{6,20}" maxlength="32">
+                    <span class="privacy"><input type="checkbox" th:field="*{showStudentNo}"> 公开页显示</span>
+                </label>
+                <label>学院
+                    <input type="text" th:field="*{college}" maxlength="128" required>
+                </label>
+                <label>专业
+                    <input type="text" th:field="*{major}" maxlength="128" required>
+                </label>
+                <label>年级
+                    <input type="text" th:field="*{grade}" maxlength="32" required placeholder="如 2024 级">
+                </label>
+                <label>手机（可空）
+                    <input type="text" th:field="*{phone}" maxlength="32">
+                    <span class="privacy"><input type="checkbox" th:field="*{showPhone}"> 公开页显示</span>
+                </label>
+                <label>邮箱（可空）
+                    <input type="text" th:field="*{email}" maxlength="254">
+                    <span class="privacy"><input type="checkbox" th:field="*{showEmail}"> 公开页显示</span>
+                </label>
+                <label>博客 / 主页（可空）
+                    <input type="text" th:field="*{blog}" maxlength="2048" placeholder="https://...">
+                    <span class="privacy"><input type="checkbox" th:field="*{showBlog}"> 公开页显示</span>
+                </label>
+                <div class="form-actions"><button type="submit" class="btn">保存资料</button></div>
+            </form>
+        </div>
+    </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

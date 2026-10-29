@@ -3,39 +3,97 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${title} + ' · 网络攻防协会'">网络攻防协会</title>
+    <meta name="theme-color" content="#06182f">
+    <meta name="description" content="CUST 网络攻防协会官网：竞赛档案、积分体系、技术文章与成员空间。">
+    <title th:text="${title} + ' · CUST 网络攻防协会'">CUST 网络攻防协会</title>
+    <link rel="icon" th:href="@{/images/logo.webp}" type="image/webp">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script th:src="@{/js/app.js}" defer></script>
 </head>
 <body>
 <header th:fragment="nav" class="site-header">
-    <a class="brand" th:href="@{/}">网络攻防协会</a>
-    <nav>
-        <a th:href="@{/}">首页</a>
-        <a th:href="@{/competitions}">竞赛档案</a>
-        <a th:href="@{/points}">积分榜</a>
-        <a th:href="@{/articles}">技术空间</a>
-        <a th:href="@{/honors}">荣誉</a>
-        <a th:href="@{/announcements}">公告</a>
-        <a th:href="@{/join}">加入我们</a>
-        <a th:href="@{/about}">关于</a>
-        <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN','POINTS_ADMIN','PR_ADMIN')"
-           th:href="@{/admin}">后台</a>
-        <a sec:authorize="isAuthenticated()" th:href="@{/teams}">战队空间</a>
-        <a sec:authorize="isAuthenticated()" th:href="@{/rewards}">积分兑换</a>
-        <a sec:authorize="isAuthenticated()" th:href="@{/me/articles}">我的文章</a>
-        <a sec:authorize="isAuthenticated()" th:href="@{/me/profile}">我的资料</a>
-        <a sec:authorize="isAuthenticated()" th:href="@{/me}">我的积分</a>
-        <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
-        <a sec:authorize="!isAuthenticated()" th:href="@{/register}">注册</a>
-        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="inline-form">
-            <span class="who" th:text="${#authentication != null ? #authentication.name : ''}">用户</span>
-            <button type="submit" class="link-btn">退出</button>
-        </form>
-    </nav>
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}" aria-label="CUST 网络攻防协会首页">
+            <img class="brand-logo" th:src="@{/images/logo.webp}" alt="CUST 网络攻防协会会徽">
+            <span class="brand-copy">
+                <strong>CUST · 网络攻防协会</strong>
+                <small>NETWORK ATTACK &amp; DEFENSE ASSOCIATION</small>
+            </span>
+        </a>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="nav-burger" aria-label="打开导航菜单">
+            <span></span><span></span><span></span>
+        </label>
+        <nav class="site-nav" aria-label="主导航">
+            <div class="nav-links">
+                <a th:href="@{/}">首页</a>
+                <a th:href="@{/competitions}">竞赛档案</a>
+                <a th:href="@{/points}">积分榜</a>
+                <a th:href="@{/articles}">技术空间</a>
+                <a th:href="@{/announcements}">公告</a>
+                <a th:href="@{/honors}">荣誉</a>
+                <a th:href="@{/join}">加入我们</a>
+                <a th:href="@{/about}">关于</a>
+            </div>
+            <div class="nav-account">
+                <a sec:authorize="isAuthenticated()" th:href="@{/me}">我的积分</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/teams}">战队空间</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/rewards}">积分兑换</a>
+                <a sec:authorize="hasAnyRole('SUPER_ADMIN','CONTENT_ADMIN','POINTS_ADMIN','PR_ADMIN')"
+                   th:href="@{/admin}">后台</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
+                <a sec:authorize="!isAuthenticated()" class="nav-cta" th:href="@{/join}">加入我们</a>
+                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="inline-form">
+                    <span class="who" th:text="${#authentication != null ? #authentication.name : ''}">用户</span>
+                    <button type="submit" class="link-btn">退出</button>
+                </form>
+            </div>
+        </nav>
+    </div>
 </header>
+
+<section th:fragment="pageHero(kicker, title, lead)" class="page-hero">
+    <div class="page-hero-inner">
+        <div class="page-hero-copy">
+            <p class="eyebrow" th:text="${kicker}">CUST · CTF</p>
+            <h1 th:text="${title}">页面标题</h1>
+            <p class="lead" th:text="${lead}">说明</p>
+        </div>
+        <div class="page-hero-mark" aria-hidden="true">
+            <img th:src="@{/images/logo.webp}" alt="">
+        </div>
+    </div>
+</section>
+
 <footer th:fragment="footer" class="site-footer">
-    <p>© 2026 网络攻防协会 · 仅供学习交流，禁止用于未授权测试</p>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <img class="brand-logo" th:src="@{/images/logo.webp}" alt="CUST 网络攻防协会会徽">
+            <div>
+                <strong>CUST · 网络攻防协会</strong>
+                <p>把成绩、积分和技术留下来。以攻促防，以赛练兵；仅供学习交流，禁止用于任何未授权测试。</p>
+            </div>
+        </div>
+        <div class="footer-col">
+            <h3>EXPLORE</h3>
+            <a th:href="@{/competitions}">竞赛档案</a>
+            <a th:href="@{/points}">积分榜</a>
+            <a th:href="@{/articles}">技术空间</a>
+            <a th:href="@{/announcements}">公告</a>
+        </div>
+        <div class="footer-col">
+            <h3>MEMBERS</h3>
+            <a sec:authorize="isAuthenticated()" th:href="@{/me}">我的积分</a>
+            <a sec:authorize="isAuthenticated()" th:href="@{/teams}">战队空间</a>
+            <a sec:authorize="isAuthenticated()" th:href="@{/rewards}">积分兑换</a>
+            <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
+            <a th:href="@{/join}">加入我们</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© 2026 CUST 网络攻防协会 · ALL RIGHTS RESERVED</span>
+        <span>BUILT FOR LEARNING · NO UNAUTHORIZED TESTING</span>
+    </div>
 </footer>
 </body>
 </html>

@@ -3,55 +3,55 @@
 <head th:replace="~{fragments/layout :: head('战队空间')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: nav}"></header>
-<main class="container">
-    <h1>战队空间</h1>
-    <p class="lead">创建或加入战队，和队友一起打比赛。同一时间只能在一支战队里。</p>
-    <p th:if="${message}" class="ok" th:text="${message}"></p>
-    <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+<main>
+    <section th:replace="~{fragments/layout :: pageHero('MEMBER · TEAMS','战队空间','创建或加入战队，和队友一起打比赛。同一时间只能在一支战队里。')}"></section>
+    <div class="container">
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+        <div class="team-layout">
+            <section>
+                <div class="section-head">
+                    <div><p class="eyebrow">ALL TEAMS</p><h2>全部战队 · <span th:text="${#lists.size(teams)}">0</span></h2></div>
+                </div>
+                <p th:if="${#lists.isEmpty(teams)}" class="lead">还没有战队，来创建第一支吧。</p>
+                <ul class="team-list" th:unless="${#lists.isEmpty(teams)}">
+                    <li th:each="t : ${teams}">
+                        <div class="row-between">
+                            <a class="team-name" th:href="@{/teams/{id}(id=${t.id()})}" th:text="${t.name()}">战队</a>
+                            <span class="tag" th:text="${t.memberCount()} + ' 人'">0 人</span>
+                        </div>
+                        <p class="hint" style="margin-top:4px;">队长 <span th:text="${t.leaderName()}">成员</span></p>
+                        <p class="hint" th:if="${t.intro() != null}" th:text="${t.intro()}">简介</p>
+                    </li>
+                </ul>
+            </section>
 
-    <div class="team-layout">
-        <section>
-            <h2>全部战队（<span th:text="${#lists.size(teams)}">0</span>）</h2>
-            <p th:if="${#lists.isEmpty(teams)}" class="lead">还没有战队，来创建第一支吧。</p>
-            <ul class="team-list" th:unless="${#lists.isEmpty(teams)}">
-                <li th:each="t : ${teams}">
-                    <div class="row-between">
-                        <a class="team-name" th:href="@{/teams/{id}(id=${t.id()})}" th:text="${t.name()}">战队</a>
-                        <span class="hint">队长 <span th:text="${t.leaderName()}">成员</span>
-                            · <span th:text="${t.memberCount()}">0</span> 人</span>
-                    </div>
-                    <p class="hint" th:if="${t.intro() != null}" th:text="${t.intro()}">简介</p>
-                </li>
-            </ul>
-        </section>
+            <aside class="panel team-side">
+                <p class="eyebrow">MY TEAM</p>
+                <h2 style="margin-top:6px;">我的战队</h2>
+                <div th:if="${myTeam != null}" style="margin-top:12px;">
+                    <p><a class="team-name" th:href="@{/teams/{id}(id=${myTeam.id()})}"
+                          th:text="${myTeam.name()}">战队</a></p>
+                    <p class="hint">队长 <span th:text="${myTeam.leaderName()}">成员</span>
+                        · <span th:text="${myTeam.memberCount()}">0</span> 人</p>
+                    <a class="btn ghost small" style="margin-top:10px;" th:href="@{/teams/{id}(id=${myTeam.id()})}">进入战队</a>
+                </div>
+                <p th:if="${myTeam == null}" class="lead" style="margin-top:10px;">你还没有加入战队。</p>
 
-        <aside class="team-side">
-            <h2>我的战队</h2>
-            <div th:if="${myTeam != null}">
-                <p><a class="team-name" th:href="@{/teams/{id}(id=${myTeam.id()})}"
-                      th:text="${myTeam.name()}">战队</a></p>
-                <p class="hint">队长 <span th:text="${myTeam.leaderName()}">成员</span>
-                    · <span th:text="${myTeam.memberCount()}">0</span> 人</p>
-            </div>
-            <p th:if="${myTeam == null}" class="lead">你还没有加入战队。</p>
-
-            <div th:if="${myTeam == null}" class="team-create">
-                <h2>创建战队</h2>
-                <form th:action="@{/teams}" method="post" class="form-grid single">
-                    <label>战队名
-                        <input type="text" name="name" required minlength="2" maxlength="50"
-                               placeholder="2-50 个字符">
-                    </label>
-                    <label>简介（可选）
-                        <textarea name="intro" maxlength="500" rows="4"
-                                  placeholder="目标、方向、招人要求……"></textarea>
-                    </label>
-                    <div class="form-actions">
-                        <button type="submit" class="btn">创建并成为队长</button>
-                    </div>
-                </form>
-            </div>
-        </aside>
+                <div th:if="${myTeam == null}" class="team-create">
+                    <h2>创建战队</h2>
+                    <form th:action="@{/teams}" method="post" class="form-grid single">
+                        <label>战队名
+                            <input type="text" name="name" required minlength="2" maxlength="50" placeholder="2-50 个字符">
+                        </label>
+                        <label>简介（可选）
+                            <textarea name="intro" maxlength="500" rows="4" placeholder="目标、方向、招人要求……"></textarea>
+                        </label>
+                        <div class="form-actions"><button type="submit" class="btn">创建并成为队长</button></div>
+                    </form>
+                </div>
+            </aside>
+        </div>
     </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
