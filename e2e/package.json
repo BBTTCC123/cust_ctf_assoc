@@ -1,0 +1,15 @@
+{
+  "name": "cust-ctf-assoc-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "网络攻防协会网站浏览器端到端测试（Playwright）",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "install:browsers": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "mysql2": "^3.11.0"
+  }
+}

@@ -21,7 +21,9 @@
 
 - 看全部已发布文章（含站内文章），收藏、评论（先审后发）
 - 我的积分：每笔分怎么来的、归属哪个月、可发起申诉
-- 我的资料：实名资料与逐字段隐私开关；公开页展示允许公开的字段和能力概览
+- 我的资料：实名资料与逐字段隐私开关；公开页展示允许公开的字段和六类竞赛能力雷达
+- 战队空间：创建战队、查看成员；队长按用户名添加/移出成员、转让队长、编辑简介、解散战队
+- 积分兑换：查看可兑换资源，提交/取消兑换申请，跟踪审核状态
 - 我的文章：写草稿、编辑、提交审核、查看驳回原因
 - 自助修改密码
 
@@ -32,6 +34,8 @@
 | 比赛与奖项 | 增删改查比赛；记个人奖、团队奖；CSV 批量导入；关联现场照片 | 超管 / 积分 |
 | 积分审核 | 登记挖洞与护网、审批入账、驳回；发布积分规则版本 | 超管 / 积分 |
 | 积分申诉 | 处理申诉（成立即冲抵） | 超管 / 积分 |
+| 积分兑换 | 配置兑换资源、上下架、审核兑换申请（通过即扣余额与库存） | 超管 / 积分 |
+| 战队管理 | 查看全部战队（含已解散）、强制解散 | 仅超管 |
 | 文章审核 | 审文章、下架；评论审核；敏感词库管理 | 超管 / 内容 |
 | 媒体 | 上传、审核（选择 PUBLIC/MEMBER/OWNER）、下架、删除 | 超管 / 内容 |
 | 公告与招新 | 发公告、加荣誉、下架；处理招新报名状态 | 超管 / 宣传 |
@@ -48,8 +52,9 @@
 4. **涉及漏洞点的文章强制站内可见。** 作者选「公开」会被服务端覆盖 —— 这个站的备案主体是个人，漏洞细节公开出去没人兜。
 5. **归属月锁死。** 每月 3 日关账：1、2 日补录仍可归上月，3 日起补录记当月；已公布的榜不会半夜自己变。
 6. **所有积分来源走同一套链路。** 比赛奖、挖洞、护网都写 `points_request` + `points_ledger`，榜单和明细可追溯到原始记录。
-7. **敏感后台操作全部留痕。** 角色变更、封号、积分审核/冲抵、文章发布/下架、媒体审核、招新状态、规则发布都写 `audit_log`。
+7. **敏感后台操作全部留痕。** 角色变更、封号、积分审核/冲抵、文章发布/下架、媒体审核、招新状态、规则发布、战队与兑换操作都写 `audit_log`。
 8. **首次登录/重置后强制改密。** 新建账号、邀请码注册以外的重置都带一次性临时密码，登录后只能进改密页。
+9. **积分兑换不动流水。** 可用余额 = 流水合计 − 已通过的兑换成本；审核通过时原子扣库存，重复点击不会二次扣减。
 
 ---
 
@@ -65,6 +70,7 @@
 | 迁移 | Flyway（表结构只由 `db/migration` 管） |
 | 校验 | Bean Validation |
 | Markdown | commonmark-java，`escapeHtml(true)` + URL 协议白名单 |
+| 测试 | JUnit 5 + MockMvc + Testcontainers MySQL + Playwright |
 | 构建 | Maven 3.9+ |
 
 > Maven 3.6.1 跑不了 Spring Boot 3（插件要求 3.6.3+），这是升级过的原因。
@@ -125,8 +131,33 @@ mvn spring-boot:run
 ### 5. 跑测试
 
 ```bash
-mvn test     # 41 个单元测试
+mvn test                 # 58 个单元/页面测试（纯函数、策略、Markdown、敏感词、战队/兑换、页面渲染）
+mvn verify               # 单元测试 + 24 个集成测试（Testcontainers 起 MySQL 8.0）
 ```
+
+**集成测试（`*IT`）** 用 Testcontainers 启动一次性 MySQL，覆盖 V1-V9 空库迁移、四角色 URL 权限矩阵、积分封顶/申诉冲抵/幂等键、媒体两阶段审核与三档可见性、登录/强制改密/邀请码注册/CSP/招新限流。
+
+- CI 的 `integration-tests` 任务直接跑 `mvn verify -DskipUnitTests=true`，PR 必跑。
+- 本机没有 Docker 时，可指向一个**专供测试的空库**（名字建议 `assoc_it`）跑同一套用例：
+
+```bash
+mvn verify -DskipUnitTests=true \
+  "-Dit.datasource.url=jdbc:mysql://127.0.0.1:3309/assoc_it?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false" \
+  -Dit.datasource.username=assoc_it -Dit.datasource.password=assoc_it_pw
+```
+
+没有 Docker 也没配外部库时，集成测试整类跳过，`mvn test` 不受影响。外部账号需要对测试库有建表权限；`FlywayMigrationIT` 还会创建并删除一个临时 probe 库，因此需要 `CREATE/DROP DATABASE` 权限。
+
+**浏览器 E2E（Playwright）** 覆盖首页、登录/首次改密、成员投稿→管理员发布、积分榜与成员页：
+
+```bash
+cd e2e
+npm ci
+npx playwright install chromium      # 本机也可用 E2E_CHANNEL=msedge 免下载
+npm test
+```
+
+E2E 默认由 Playwright 用 `target/cust-ctf-assoc-0.0.1-SNAPSHOT.jar` 拉起应用，需要先 `mvn -Dmaven.test.skip=true package`，并设置 `DB_URL / DB_USER / DB_PASSWORD / ADMIN_PASSWORD`。CI 的 `e2e` 任务自动完成这些步骤。
 
 ---
 
@@ -144,10 +175,18 @@ src/main/java/cn/edu/cust/assoc
 └─ security      从数据库加载用户、当前用户、强制改密过滤器
 
 src/main/resources
-├─ db/migration  V1~V8 迁移脚本
+├─ db/migration  V1~V9 迁移脚本
 ├─ templates     Thymeleaf 页面（公开页 + admin/ + me/）
 ├─ static        样式与确认弹窗脚本
 └─ application.yml
+
+src/test/java/cn/edu/cust/assoc
+├─ support       IntegrationTestBase / TestDatabase / TestContainerConfig
+├─ migration     FlywayMigrationIT（空库执行 V1-V9）
+├─ security      四角色 URL 矩阵、认证流程、CSP 与招新限流
+└─ service       积分封顶/冲抵/幂等、媒体两阶段审核与可见性
+
+e2e/             Playwright 配置、浏览器用例与榜单数据准备
 
 scripts/         deploy.sh / backup-db.sh
 docs/            开发规范、本地开发、运维手册、部署清单
@@ -167,6 +206,7 @@ docs/            开发规范、本地开发、运维手册、部署清单
 | V6 | 技术文章 + 敏感词 |
 | V7 | 公告 / 荣誉 / 招新报名 |
 | V8 | 强制改密、审计日志、媒体关联、标签/评论/收藏、内容软删除、团队奖唯一约束、积分外键、规则种子、移除演示数据 |
+| V9 | 战队空间增量（创建/入队时间、状态约束）、兑换资源与兑换申请 |
 
 **已经执行过的迁移不要改**，要改结构就新建 V9、V10。
 
@@ -224,11 +264,11 @@ docs/            开发规范、本地开发、运维手册、部署清单
 
 ## 已知限制
 
-- 战队空间、完整能力雷达图（目前只有按获奖类别的概览条）、积分兑换**没做**（1.0 砍掉了，不是忘了）。
+- 战队成员由队长按登录用户名直接添加，没有邀请确认流程；战队解散后名字仍被占用，不能复用。
+- 积分兑换在待审核阶段不预留积分、不锁库存，以审核通过时的余额与库存为准，先到先得。
 - 招新限流是**进程内计数**，重启清零；多实例部署需要换 Redis。
 - 敏感词是「规范化 + 包含匹配」，能挡零宽字符、全角、换行和制表符，挡不住拼音谐音，所以评论和文章必须配人工审核。
 - 文章禁止复制只是前端提示，截图和看源码都能绕过。
-- 自动化测试目前覆盖纯函数、URL/口令策略、Markdown 安全、敏感词和资料隐私（41 个单元测试）；数据库集成测试与浏览器 E2E 尚未接入 CI（P2 尾项）。
 
 ---
 

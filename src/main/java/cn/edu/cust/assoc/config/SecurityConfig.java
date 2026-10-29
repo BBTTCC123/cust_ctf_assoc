@@ -69,8 +69,11 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health").permitAll()
                 // 账号域只有超管
                 .requestMatchers("/admin/users/**", "/admin/audit/**").hasRole("SUPER_ADMIN")
+                // 战队管理只有超管；战队空间本身对所有登录成员开放（默认 anyRequest 已拦住匿名）
+                .requestMatchers("/admin/teams/**").hasRole("SUPER_ADMIN")
                 // 积分域：积分管理员 + 超管
-                .requestMatchers("/admin/points/**", "/admin/appeals/**", "/admin/competitions/**")
+                .requestMatchers("/admin/points/**", "/admin/appeals/**", "/admin/competitions/**",
+                                "/admin/rewards/**")
                     .hasAnyRole("SUPER_ADMIN", "POINTS_ADMIN")
                 // 内容域：内容管理员 + 超管
                 .requestMatchers("/admin/articles/**", "/admin/media/**", "/admin/comments/**", "/admin/sensitive-words/**")

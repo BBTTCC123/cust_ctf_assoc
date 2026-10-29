@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('积分兑换')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>积分兑换管理</h1>
+        <p class="lead">资源名称与分值都在这里配置，不在代码里写死。审核通过才扣余额与库存。</p>
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+        <h2>新增资源</h2>
+        <form th:action="@{/admin/rewards/items}" method="post" class="form-grid">
+            <label>名称
+                <input type="text" name="name" required maxlength="100" placeholder="如：协会定制贴纸">
+            </label>
+            <label>所需积分
+                <input type="number" name="costPoints" min="1" step="1" required>
+            </label>
+            <label>库存
+                <input type="number" name="stock" min="0" step="1" value="0" required>
+            </label>
+            <label>排序（小的在前）
+                <input type="number" name="sortOrder" step="1" value="0">
+            </label>
+            <label class="inline-check">立即上架
+                <input type="checkbox" name="enabled" checked>
+            </label>
+            <label class="grid-span">说明
+                <textarea name="description" rows="2" maxlength="500"
+                          placeholder="兑换说明、领取方式等"></textarea>
+            </label>
+            <div class="form-actions">
+                <button type="submit" class="btn">创建资源</button>
+            </div>
+        </form>
+
+        <h2>资源列表（<span th:text="${#lists.size(items)}">0</span>）</h2>
+        <p th:if="${#lists.isEmpty(items)}" class="lead">还没有配置任何资源。</p>
+        <table class="table" th:unless="${#lists.isEmpty(items)}">
+            <thead><tr><th>id</th><th>名称</th><th>积分</th><th>库存</th><th>排序</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+            <tr th:each="item : ${items}">
+                <td th:text="${item.id()}">1</td>
+                <td>
+                    <div th:text="${item.name()}">资源</div>
+                    <div class="hint" th:if="${item.description() != null}" th:text="${item.description()}">说明</div>
+                    <details>
+                        <summary class="hint">编辑</summary>
+                        <form th:action="@{/admin/rewards/items/{id}(id=${item.id()})}" method="post"
+                              class="form-grid single">
+                            <label>名称
+                                <input type="text" name="name" required maxlength="100"
+                                       th:value="${item.name()}">
+                            </label>
+                            <label>所需积分
+                                <input type="number" name="costPoints" min="1" step="1" required
+                                       th:value="${item.costPoints()}">
+                            </label>
+                            <label>库存
+                                <input type="number" name="stock" min="0" step="1" required
+                                       th:value="${item.stock()}">
+                            </label>
+                            <label>排序
+                                <input type="number" name="sortOrder" step="1"
+                                       th:value="${item.sortOrder()}">
+                            </label>
+                            <label class="inline-check">上架
+                                <input type="checkbox" name="enabled" th:checked="${item.enabled()}">
+                            </label>
+                            <label>说明
+                                <textarea name="description" rows="2" maxlength="500"
+                                          th:text="${item.description()}"></textarea>
+                            </label>
+                            <div class="form-actions">
+                                <button type="submit" class="btn">保存</button>
+                            </div>
+                        </form>
+                    </details>
+                </td>
+                <td th:text="${item.costPoints()}">0</td>
+                <td th:text="${item.stock()}">0</td>
+                <td th:text="${item.sortOrder()}">0</td>
+                <td>
+                    <span class="tag" th:if="${item.enabled()}">已上架</span>
+                    <span class="tag warn" th:unless="${item.enabled()}">已下架</span>
+                </td>
+                <td>
+                    <form th:action="@{/admin/rewards/items/{id}/toggle(id=${item.id()})}" method="post"
+                          class="inline-form">
+                        <button type="submit" class="link-btn"
+                                th:text="${item.enabled()} ? '下架' : '上架'">上架</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2>兑换申请（<span th:text="${#lists.size(requests)}">0</span>）</h2>
+        <p th:if="${#lists.isEmpty(requests)}" class="lead">还没有兑换申请。</p>
+        <table class="table" th:unless="${#lists.isEmpty(requests)}">
+            <thead><tr><th>id</th><th>成员</th><th>资源</th><th>积分</th><th>状态</th><th>申请时间</th>
+                <th>备注</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${requests}">
+                <td th:text="${r.id()}">1</td>
+                <td th:text="${r.userName()}">成员</td>
+                <td th:text="${r.itemName()}">资源</td>
+                <td th:text="${r.costPoints()}">0</td>
+                <td>
+                    <span class="tag" th:if="${r.state() == 'PENDING'}">待审核</span>
+                    <span class="tag" th:if="${r.state() == 'APPROVED'}">已通过</span>
+                    <span class="tag warn" th:if="${r.state() == 'REJECTED'}">已驳回</span>
+                    <span class="tag" th:if="${r.state() == 'CANCELLED'}">已取消</span>
+                </td>
+                <td th:text="${r.createdAt()}">时间</td>
+                <td>
+                    <span th:if="${r.note() != null}" th:text="${r.note()}">备注</span>
+                    <span th:if="${r.reviewNote() != null}" class="hint"
+                          th:text="'审核：' + ${r.reviewNote()}">审核备注</span>
+                </td>
+                <td class="actions" th:if="${r.state() == 'PENDING'}">
+                    <form th:action="@{/admin/rewards/requests/{id}/approve(id=${r.id()})}" method="post"
+                          class="inline-form" data-confirm="通过后立即扣减余额与库存，确定？">
+                        <button type="submit" class="link-btn">通过</button>
+                    </form>
+                    <form th:action="@{/admin/rewards/requests/{id}/reject(id=${r.id()})}" method="post"
+                          class="inline-form">
+                        <input type="text" name="note" placeholder="驳回原因" maxlength="500">
+                        <button type="submit" class="link-btn danger">驳回</button>
+                    </form>
+                </td>
+                <td th:if="${r.state() != 'PENDING'}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

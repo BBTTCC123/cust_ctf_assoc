@@ -23,16 +23,39 @@
         </ul>
     </section>
 
-    <section th:if="${!#lists.isEmpty(member.ability())}">
-        <h2>能力概览（按获奖类别）</h2>
-        <div class="ability-list">
-            <div class="ability-row" th:each="a : ${member.ability()}">
-                <span class="ability-label" th:text="${a.label()}">Web</span>
-                <span class="bar"><span th:style="'width:' + ${a.percent()} + '%'"></span></span>
-                <span class="ability-count" th:text="${a.count()} + ' 次'">1 次</span>
-            </div>
+    <section>
+        <h2>能力雷达（六类竞赛）</h2>
+        <div th:if="${!member.radar().hasData()}" class="lead">还没有获奖记录，录入奖项后雷达图会自动出现。</div>
+        <div class="radar-wrap" th:if="${member.radar().hasData()}">
+            <svg class="radar" th:attr="viewBox=${member.radar().viewBox()}"
+                 role="img" aria-label="六类竞赛能力雷达图">
+                <polygon class="radar-grid" th:each="ring : ${member.radar().rings()}"
+                         th:attr="points=${ring}"></polygon>
+                <line class="radar-spoke" th:each="s : ${member.radar().spokes()}"
+                      th:attr="x1=${s.x1()},y1=${s.y1()},x2=${s.x2()},y2=${s.y2()}"></line>
+                <polygon class="radar-team" th:attr="points=${member.radar().teamPolygon()}"></polygon>
+                <polygon class="radar-personal" th:attr="points=${member.radar().personalPolygon()}"></polygon>
+                <text class="radar-label" th:each="l : ${member.radar().labels()}"
+                      th:attr="x=${l.x()},y=${l.y()},text-anchor=${l.anchor()}"
+                      th:text="${l.text()}">Web</text>
+            </svg>
+            <ul class="radar-legend">
+                <li><i class="legend personal"></i>个人获奖</li>
+                <li><i class="legend team"></i>团队奖份额</li>
+            </ul>
         </div>
-        <p class="hint">统计口径：个人获奖记录（团队奖份额暂不计入）。</p>
+        <table class="table radar-table" th:if="${member.radar().hasData()}">
+            <thead><tr><th>类别</th><th>个人获奖</th><th>团队奖份额</th><th>合计</th></tr></thead>
+            <tbody>
+            <tr th:each="axis : ${member.radar().axes()}">
+                <td th:text="${axis.label()}">Web</td>
+                <td th:text="${axis.personal()}">0</td>
+                <td th:text="${axis.team()}">0</td>
+                <td th:text="${axis.total()}">0</td>
+            </tr>
+            </tbody>
+        </table>
+        <p class="hint">统计口径：个人获奖记录 + 团队奖中分到本人的份额，按竞赛类别计数。</p>
     </section>
 
     <h2>来源汇总</h2>

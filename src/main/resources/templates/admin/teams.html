@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('战队管理')}"></head>
+<body>
+<header th:replace="~{admin/layout :: topbar}"></header>
+<div class="admin-shell">
+    <aside th:replace="~{admin/layout :: sidebar}"></aside>
+    <main class="admin-main">
+        <h1>战队管理</h1>
+        <p class="lead">查看全部战队（含已解散）。只有超管可以强制解散战队；解散会写入审计日志。</p>
+        <p th:if="${message}" class="ok" th:text="${message}"></p>
+        <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
+
+        <p th:if="${#lists.isEmpty(teams)}" class="lead">还没有战队。</p>
+        <table class="table" th:unless="${#lists.isEmpty(teams)}">
+            <thead><tr><th>id</th><th>战队</th><th>队长</th><th>在队人数</th><th>状态</th><th>创建时间</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="t : ${teams}">
+                <td th:text="${t.id()}">1</td>
+                <td><a th:href="@{/teams/{id}(id=${t.id()})}" th:text="${t.name()}">战队</a></td>
+                <td th:text="${t.leaderName()}">成员</td>
+                <td th:text="${t.memberCount()}">0</td>
+                <td>
+                    <span class="tag" th:if="${t.status() == 'ACTIVE'}">在队</span>
+                    <span class="tag warn" th:if="${t.status() == 'DISBANDED'}">已解散</span>
+                </td>
+                <td th:text="${t.createdAt()}">时间</td>
+                <td>
+                    <form th:if="${t.status() == 'ACTIVE'}"
+                          th:action="@{/admin/teams/{id}/disband(id=${t.id()})}" method="post"
+                          class="inline-form" data-confirm="确定以管理员身份解散这个战队？">
+                        <button type="submit" class="link-btn danger">强制解散</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

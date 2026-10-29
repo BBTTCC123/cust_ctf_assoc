@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
+import java.util.Locale;
 
 /**
  * 本地存储。两个区：private 不在任何静态目录下，public 将来可以交给 Nginx 直出。
@@ -49,7 +50,11 @@ public class LocalStorageService {
     }
 
     private Path resolve(String zone, String key) {
-        Path p = root.resolve(zone).resolve(key).normalize();
+        String normalizedZone = zone == null ? "" : zone.toLowerCase(Locale.ROOT);
+        if (!"private".equals(normalizedZone) && !"public".equals(normalizedZone)) {
+            throw new IllegalArgumentException("非法存储区");
+        }
+        Path p = root.resolve(normalizedZone).resolve(key).normalize();
         if (!p.startsWith(root)) {
             throw new IllegalArgumentException("非法路径");
         }

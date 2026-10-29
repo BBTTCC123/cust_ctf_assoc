@@ -104,12 +104,37 @@ details summary { cursor: pointer; margin: 8px 0; }
 .profile-list { list-style: none; padding: 0; color: var(--muted); }
 .profile-list li { padding: 4px 0; }
 .privacy { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .85rem; }
-.ability-list { display: flex; flex-direction: column; gap: 8px; max-width: 520px; }
-.ability-row { display: grid; grid-template-columns: 80px 1fr 56px; gap: 10px; align-items: center; font-size: .9rem; }
-.ability-label { color: var(--muted); }
-.ability-count { color: var(--muted); text-align: right; }
-.bar { background: #eef2ff; border-radius: 999px; height: 10px; overflow: hidden; display: block; }
-.bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+/* 能力雷达图（六类竞赛，个人奖 + 团队奖份额） */
+.radar-wrap { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.radar { width: 360px; max-width: 100%; height: auto; }
+.radar-grid { fill: none; stroke: #dbe2ea; stroke-width: 1; }
+.radar-spoke { stroke: #dbe2ea; stroke-width: 1; }
+.radar-personal { fill: rgba(37, 99, 235, .18); stroke: var(--accent); stroke-width: 2; }
+.radar-team { fill: rgba(15, 118, 110, .15); stroke: #0f766e; stroke-width: 2; stroke-dasharray: 5 4; }
+.radar-label { font-size: 12px; fill: var(--muted); }
+.radar-legend { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: .9rem; color: var(--muted); }
+.legend { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.legend.personal { background: rgba(37, 99, 235, .3); border: 2px solid var(--accent); }
+.legend.team { background: rgba(15, 118, 110, .25); border: 2px dashed #0f766e; }
+.radar-table { max-width: 560px; }
+
+/* 战队空间 */
+.team-layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 32px; align-items: start; }
+.team-list { list-style: none; padding: 0; }
+.team-list li { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.team-name { font-weight: 600; color: var(--ink); text-decoration: none; }
+.team-name:hover { color: var(--accent); }
+.team-side { border-left: 1px solid var(--line); padding-left: 24px; }
+.team-create form { margin-top: 12px; }
+
+/* 积分兑换 */
+.reward-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 16px; }
+.reward-card { display: flex; flex-direction: column; gap: 8px; }
+.reward-cost { margin: 0; color: var(--muted); }
+.reward-form { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+.reward-form input { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; }
+.grid-span { grid-column: 1 / -1; }
+.danger-btn { background: #b91c1c; }
 
 /* 照片墙 */
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -129,6 +154,8 @@ details summary { cursor: pointer; margin: 8px 0; }
     .table td, .table th { white-space: normal; min-width: 90px; }
     .form-grid { grid-template-columns: 1fr; }
     .article-grid { grid-template-columns: 1fr; }
+    .team-layout { grid-template-columns: 1fr; }
+    .team-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 18px; }
     .inline-grid { flex-direction: column; align-items: stretch; }
     .inline-grid input, .inline-grid select, .inline-grid button { width: 100%; }
     .actions .inline-form { margin-left: 0; }
