@@ -205,6 +205,18 @@ class PointsServiceIT extends IntegrationTestBase {
                 .hasMessageContaining("已经有一条待处理的申诉");
     }
 
+    @Test
+    void sameVulnerabilityCannotBeResubmittedWithAnotherSeverity() {
+        String externalId = uniqueName("severity");
+        submitHighBounty(externalId);
+
+        assertThatThrownBy(() -> pointsService.submitBounty(
+                member.getId(), "CRITICAL", "SINGLE", "demo.example.com",
+                "EDUSRC", externalId, LocalDate.now().minusDays(1), PROOF, reviewer.getId()))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("不能按另一等级");
+    }
+
     private PointsRequestEntity submitHighBounty(String externalId) {
         return pointsService.submitBounty(member.getId(), "HIGH", "SINGLE", "demo.example.com",
                 "EDUSRC", externalId, LocalDate.now().minusDays(1), PROOF, reviewer.getId());

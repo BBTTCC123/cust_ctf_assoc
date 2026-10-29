@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.controller;
 
+import cn.edu.cust.assoc.common.BizException;
 import cn.edu.cust.assoc.dto.ArticleEditView;
 import cn.edu.cust.assoc.dto.MyArticleRow;
 import cn.edu.cust.assoc.domain.ArticleEntity;
@@ -61,13 +62,10 @@ public class MyArticleController {
                          Authentication auth, RedirectAttributes redirect) {
         try {
             ArticleEntity article = articleService.create(currentUser.id(auth), title, summary,
-                    contentMd, involvesVuln, visibility, parseTags(tags), submit);
-            if (coverMediaId != null) {
-                mediaLinkService.setSingle(MediaLinkService.ARTICLE_COVER, article.getId(), coverMediaId);
-            }
+                    contentMd, involvesVuln, visibility, parseTags(tags), coverMediaId, submit);
             redirect.addFlashAttribute("message", submit ? "已提交审核" : "草稿已保存");
             return submit ? "redirect:/me/articles" : "redirect:/me/articles/" + article.getId() + "/edit";
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/me/articles/new";
         }
@@ -99,11 +97,10 @@ public class MyArticleController {
                          Authentication auth, RedirectAttributes redirect) {
         try {
             articleService.updateOwn(currentUser.id(auth), id, title, summary, contentMd,
-                    involvesVuln, visibility, parseTags(tags));
-            mediaLinkService.setSingle(MediaLinkService.ARTICLE_COVER, id, coverMediaId);
+                    involvesVuln, visibility, parseTags(tags), coverMediaId);
             redirect.addFlashAttribute("message", "已保存为草稿");
             return "redirect:/me/articles";
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/me/articles/" + id + "/edit";
         }
@@ -114,7 +111,7 @@ public class MyArticleController {
         try {
             articleService.submitOwn(currentUser.id(auth), id);
             redirect.addFlashAttribute("message", "已提交审核");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/me/articles";

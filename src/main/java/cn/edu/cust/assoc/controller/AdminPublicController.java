@@ -56,11 +56,7 @@ public class AdminPublicController {
                                   Authentication auth, RedirectAttributes redirect) {
         try {
             AnnouncementEntity announcement = service.publishAnnouncement(
-                    currentUser.id(auth), title, contentMd, pinned);
-            if (attachmentMediaId != null) {
-                mediaLinkService.setSingle(MediaLinkService.ANNOUNCEMENT_ATTACHMENT,
-                        announcement.getId(), attachmentMediaId);
-            }
+                    currentUser.id(auth), title, contentMd, pinned, attachmentMediaId);
             redirect.addFlashAttribute("message", "公告已发布");
         } catch (RuntimeException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());

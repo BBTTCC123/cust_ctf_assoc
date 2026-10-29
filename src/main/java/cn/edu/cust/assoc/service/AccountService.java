@@ -100,6 +100,8 @@ public class AccountService {
         user.setPasswordHash(passwordEncoder.encode(newRaw));
         user.setMustChangePassword(false);
         userRepository.save(user);
+        // 密码是账号的主要凭证：改密后所有旧会话都必须失效，不能只销毁当前浏览器。
+        sessions.expireAll(userId);
         audit.record("PASSWORD_CHANGE", "USER", userId, user.getUsername(), "本人修改密码");
     }
 

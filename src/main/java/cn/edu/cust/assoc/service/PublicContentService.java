@@ -29,15 +29,17 @@ public class PublicContentService {
     private final HonorRepository honors;
     private final RecruitApplicationRepository recruits;
     private final MarkdownRenderer renderer;
+    private final MediaLinkService mediaLinks;
     private final AuditService audit;
 
     public PublicContentService(AnnouncementRepository announcements, HonorRepository honors,
                                 RecruitApplicationRepository recruits, MarkdownRenderer renderer,
-                                AuditService audit) {
+                                MediaLinkService mediaLinks, AuditService audit) {
         this.announcements = announcements;
         this.honors = honors;
         this.recruits = recruits;
         this.renderer = renderer;
+        this.mediaLinks = mediaLinks;
         this.audit = audit;
     }
 
@@ -68,7 +70,8 @@ public class PublicContentService {
     }
 
     @Transactional
-    public AnnouncementEntity publishAnnouncement(Long authorId, String title, String contentMd, boolean pinned) {
+    public AnnouncementEntity publishAnnouncement(Long authorId, String title, String contentMd,
+                                                  boolean pinned, Long attachmentMediaId) {
         if (title == null || title.isBlank()) throw new BizException("标题不能为空");
         if (contentMd == null || contentMd.isBlank()) throw new BizException("正文不能为空");
         if (title.length() > 200) throw new BizException("标题不能超过 200 字");
@@ -79,6 +82,10 @@ public class PublicContentService {
         announcement.setAuthorId(authorId);
         announcement.setPinned(pinned);
         AnnouncementEntity saved = announcements.save(announcement);
+        if (attachmentMediaId != null) {
+            mediaLinks.setSingle(MediaLinkService.ANNOUNCEMENT_ATTACHMENT,
+                    saved.getId(), attachmentMediaId);
+        }
         audit.record("ANNOUNCEMENT_PUBLISH", "ANNOUNCEMENT", saved.getId(), null, saved.getTitle());
         return saved;
     }

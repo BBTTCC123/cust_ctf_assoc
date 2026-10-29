@@ -4,12 +4,15 @@ import cn.edu.cust.assoc.domain.CommentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Collection;
 
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
 
     List<CommentEntity> findByArticleIdAndStateOrderByCreatedAtAsc(Long articleId, String state);
 
     List<CommentEntity> findByStateOrderByCreatedAtAsc(String state);
+
+    List<CommentEntity> findByStateInOrderByCreatedAtDesc(Collection<String> states);
 
     List<CommentEntity> findByArticleIdOrderByCreatedAtDesc(Long articleId);
 }

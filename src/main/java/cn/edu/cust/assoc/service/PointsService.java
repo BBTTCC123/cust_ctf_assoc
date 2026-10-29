@@ -126,6 +126,9 @@ public class PointsService {
         if (!"PENDING".equals(request.getState())) {
             throw new BizException("这张申请单已经处理过了");
         }
+        if (reviewerId.equals(request.getUserId())) {
+            throw new BizException("不能审核自己的积分申请，请由其他管理员处理");
+        }
 
         String key = "EARN:" + request.getId();
         Optional<PointsLedgerEntity> existing = ledgerRepository.findByIdempotencyKey(key);
@@ -177,6 +180,9 @@ public class PointsService {
     public PointsLedgerEntity recordApproved(Long userId, String sourceType, Long competitionId, int points,
                                              LocalDate occurredOn, String proofUrl, String note,
                                              String idempotencyKey, Long operatorId) {
+        if (operatorId != null && operatorId.equals(userId)) {
+            throw new BizException("不能直接为自己的成绩入账，请由其他积分管理员登记");
+        }
         Optional<PointsLedgerEntity> existing = ledgerRepository.findByIdempotencyKey(idempotencyKey);
         if (existing.isPresent()) {
             return existing.get();
@@ -281,7 +287,12 @@ public class PointsService {
         appeal.setUserId(userId);
         appeal.setReason(reason.trim());
         appeal.setState("OPEN");
-        PointsAppealEntity saved = appealRepository.save(appeal);
+        PointsAppealEntity saved;
+        try {
+            saved = appealRepository.saveAndFlush(appeal);
+        } catch (DataIntegrityViolationException e) {
+            throw new BizException("这笔流水已经有一条待处理的申诉");
+        }
         audit.record("APPEAL_SUBMIT", "APPEAL", saved.getId(), null, "流水 " + ledgerId);
         return saved;
     }
@@ -289,6 +300,11 @@ public class PointsService {
     /** 申诉成立：原子流转 OPEN -> ACCEPTED，写处理人，并冲抵原流水。 */
     @Transactional
     public void acceptAppeal(Long appealId, Long reviewerId) {
+        PointsAppealEntity before = appealRepository.findById(appealId)
+                .orElseThrow(() -> new BizException("申诉不存在"));
+        if (reviewerId.equals(before.getUserId())) {
+            throw new BizException("不能处理自己的积分申诉");
+        }
         int updated = appealRepository.handleOpen(appealId, "ACCEPTED", reviewerId, LocalDateTime.now());
         if (updated == 0) {
             throw new BizException("这条申诉已经处理过了");
@@ -302,6 +318,11 @@ public class PointsService {
     /** 申诉驳回：同样只能处理 OPEN，写处理人。 */
     @Transactional
     public void rejectAppeal(Long appealId, Long reviewerId, String note) {
+        PointsAppealEntity before = appealRepository.findById(appealId)
+                .orElseThrow(() -> new BizException("申诉不存在"));
+        if (reviewerId.equals(before.getUserId())) {
+            throw new BizException("不能处理自己的积分申诉");
+        }
         int updated = appealRepository.handleOpen(appealId, "REJECTED", reviewerId, LocalDateTime.now());
         if (updated == 0) {
             throw new BizException("这条申诉已经处理过了");
@@ -346,7 +367,7 @@ public class PointsService {
         Optional<VulnerabilityEntity> existing = vulnerabilityRepository
                 .findByPlatformAndExternalId(platform, externalId);
         if (existing.isPresent()) {
-            return existing.get();
+            return requireSameVulnerabilityLevel(existing.get(), level);
         }
         VulnerabilityEntity vulnerability = new VulnerabilityEntity();
         vulnerability.setPlatform(platform);
@@ -359,7 +380,18 @@ public class PointsService {
         } catch (DataIntegrityViolationException e) {
             // 并发下另一个请求先建了同一个漏洞点：回读即可
             return vulnerabilityRepository.findByPlatformAndExternalId(platform, externalId)
+                    .map(entity -> requireSameVulnerabilityLevel(entity, level))
                     .orElseThrow(() -> e);
         }
+    }
+
+    private VulnerabilityEntity requireSameVulnerabilityLevel(VulnerabilityEntity vulnerability,
+                                                              String requestedLevel) {
+        if (!requestedLevel.equals(vulnerability.getLevel())) {
+            throw new BizException("这个漏洞编号已登记为 "
+                    + PointCalc.Level.valueOf(vulnerability.getLevel()).getLabel()
+                    + "，不能按另一等级重复提交");
+        }
+        return vulnerability;
     }
 }

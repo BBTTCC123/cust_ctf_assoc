@@ -56,7 +56,8 @@ public class ArticleViewService {
         List<CommentView> comments = commentViews(commentService.approvedOf(articleId));
         MediaEntity cover = mediaLinkService.singleOf(MediaLinkService.ARTICLE_COVER, articleId);
         boolean favorited = viewerId != null && favoriteService.isFavorited(viewerId, articleId);
-        boolean canEdit = viewerId != null && article.getAuthorId().equals(viewerId);
+        boolean canEdit = viewerId != null && article.getAuthorId().equals(viewerId)
+                && ("DRAFT".equals(article.getState()) || "REJECTED".equals(article.getState()));
         return new ArticleDetail(
                 article.getId(), article.getTitle(), article.getSummary(), article.getContentHtml(),
                 article.getVisibility(), Boolean.TRUE.equals(article.getInvolvesVuln()),

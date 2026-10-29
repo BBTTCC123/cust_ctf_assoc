@@ -53,7 +53,7 @@ class TeamServiceTest {
         service.create(1L, "红队", "打比赛");
 
         ArgumentCaptor<TeamMemberEntity> captor = ArgumentCaptor.forClass(TeamMemberEntity.class);
-        verify(memberRepository).save(captor.capture());
+        verify(memberRepository).saveAndFlush(captor.capture());
         assertThat(captor.getValue().getTeamId()).isEqualTo(10L);
         assertThat(captor.getValue().getUserId()).isEqualTo(1L);
         verify(audit).record(eq("TEAM_CREATE"), eq("TEAM"), eq(10L), isNull(), eq("红队"));

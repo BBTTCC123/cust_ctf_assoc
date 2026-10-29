@@ -17,7 +17,9 @@ public final class UrlPolicy {
     }
 
     public static String sanitizeImage(String raw) {
-        return sanitize(raw, false);
+        String safe = sanitize(raw, false);
+        // 页面只允许 HTTPS 外链图片；HTTP 图片在 HTTPS 站点会被浏览器拦截。
+        return safe.toLowerCase(Locale.ROOT).startsWith("http://") ? "" : safe;
     }
 
     public static boolean isSafeLink(String raw) {

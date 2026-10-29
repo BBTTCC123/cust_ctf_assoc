@@ -22,9 +22,11 @@ import java.util.Map;
 public class CsvImportService {
 
     private final CompetitionRepository competitionRepository;
+    private final AuditService audit;
 
-    public CsvImportService(CompetitionRepository competitionRepository) {
+    public CsvImportService(CompetitionRepository competitionRepository, AuditService audit) {
         this.competitionRepository = competitionRepository;
+        this.audit = audit;
     }
 
     public record Result(int created, int skipped, List<String> errors) {}
@@ -107,6 +109,8 @@ public class CsvImportService {
             competitionRepository.save(c);
             created++;
         }
+        audit.record("COMPETITION_IMPORT", "COMPETITION", null, null,
+                "新增 " + created + "，跳过 " + skipped + "，错误 " + errors.size());
         return new Result(created, skipped, errors);
     }
 }

@@ -8,7 +8,7 @@
         <h1>我的资料</h1>
         <a class="btn ghost" th:href="@{/me}">我的积分</a>
     </div>
-    <p class="lead">资料默认不公开；下面每个开关只控制对应字段在公开成员页是否显示。学院、专业、年级始终展示。</p>
+    <p class="lead">游客只能看到昵称、成绩汇总和能力图；登录用户可看学院、专业、年级及你主动公开的字段。完整积分明细仅本人、队长、积分管理员和教师可见。</p>
     <p th:if="${message}" class="ok" th:text="${message}"></p>
     <p th:if="${errorMessage}" class="err" th:text="${errorMessage}"></p>
 

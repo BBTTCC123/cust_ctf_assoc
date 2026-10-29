@@ -3,6 +3,7 @@ package cn.edu.cust.assoc.security;
 import cn.edu.cust.assoc.support.IntegrationTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
@@ -29,6 +30,9 @@ class PublicEndpointIT extends IntegrationTestBase {
 
     private static final AtomicInteger IP_SEQ = new AtomicInteger();
     private static final AtomicInteger STUDENT_SEQ = new AtomicInteger();
+
+    @Autowired
+    private LoginAttemptService loginAttempts;
 
     @Test
     void securityHeadersAreSentOnPublicPages() throws Exception {
@@ -73,6 +77,28 @@ class PublicEndpointIT extends IntegrationTestBase {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/join"))
                 .andExpect(flash().attribute("errorMessage", "提交太频繁，过一会儿再试"));
+    }
+
+    @Test
+    void repeatedLoginFailuresBlockFurtherPasswordChecks() throws Exception {
+        String username = createActiveUser("loginlimit", "LoginLimit!2026abc").getUsername();
+        String ip = "203.0.113." + IP_SEQ.incrementAndGet();
+
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(post("/login").with(csrf()).with(remoteAddr(ip))
+                            .param("username", username)
+                            .param("password", "WrongLimit!2026"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/login?error"));
+        }
+
+        org.assertj.core.api.Assertions.assertThat(loginAttempts.isBlocked(username, ip)).isTrue();
+
+        mockMvc.perform(post("/login").with(csrf()).with(remoteAddr(ip))
+                        .param("username", username)
+                        .param("password", "LoginLimit!2026abc"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?error=too_many"));
     }
 
     private String nextStudentNo() {

@@ -93,7 +93,11 @@ public class RewardService {
         request.setCostPoints(item.getCostPoints());
         request.setState(PENDING);
         request.setNote(cleanNote);
-        request = requestRepository.save(request);
+        try {
+            request = requestRepository.saveAndFlush(request);
+        } catch (DataIntegrityViolationException e) {
+            throw new BizException("这件资源已经有一条待审核的申请");
+        }
         audit.record("REDEEM_APPLY", "REDEEM_REQUEST", request.getId(), null,
                 item.getName() + " " + item.getCostPoints() + " 分");
     }
@@ -181,6 +185,9 @@ public class RewardService {
                 .orElseThrow(() -> new BizException("兑换申请不存在"));
         if (!PENDING.equals(request.getState())) {
             throw new BizException("这条申请已经处理过了");
+        }
+        if (reviewerId.equals(request.getUserId())) {
+            throw new BizException("不能审核自己的兑换申请");
         }
         // 锁用户行：同一成员的并发审核串行结算，可用余额不会被突破
         userRepository.findByIdForUpdate(request.getUserId())

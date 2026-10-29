@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.controller;
 
+import cn.edu.cust.assoc.common.BizException;
 import cn.edu.cust.assoc.dto.OwnLedgerRow;
 import cn.edu.cust.assoc.domain.PointsLedgerEntity;
 import cn.edu.cust.assoc.security.CurrentUserService;
@@ -45,7 +46,7 @@ public class MyPointsController {
         try {
             pointsService.submitAppeal(currentUser.id(auth), ledgerId, reason);
             redirect.addFlashAttribute("message", "申诉已提交，等积分管理员处理");
-        } catch (RuntimeException e) {
+        } catch (BizException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/me";

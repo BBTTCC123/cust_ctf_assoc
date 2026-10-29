@@ -4,7 +4,6 @@ import cn.edu.cust.assoc.domain.ArticleEntity;
 import cn.edu.cust.assoc.dto.ArticleAdminRow;
 import cn.edu.cust.assoc.security.CurrentUserService;
 import cn.edu.cust.assoc.service.ArticleService;
-import cn.edu.cust.assoc.service.MediaLinkService;
 import cn.edu.cust.assoc.service.UserDirectoryService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -23,14 +22,12 @@ public class AdminArticleController {
 
     private final ArticleService articleService;
     private final UserDirectoryService userDirectory;
-    private final MediaLinkService mediaLinkService;
     private final CurrentUserService currentUser;
 
     public AdminArticleController(ArticleService articleService, UserDirectoryService userDirectory,
-                                  MediaLinkService mediaLinkService, CurrentUserService currentUser) {
+                                  CurrentUserService currentUser) {
         this.articleService = articleService;
         this.userDirectory = userDirectory;
-        this.mediaLinkService = mediaLinkService;
         this.currentUser = currentUser;
     }
 
@@ -65,10 +62,7 @@ public class AdminArticleController {
                          RedirectAttributes redirect) {
         try {
             ArticleEntity article = articleService.create(currentUser.id(auth), title, summary,
-                    contentMd, involvesVuln, visibility, parseTags(tags), true);
-            if (coverMediaId != null) {
-                mediaLinkService.setSingle(MediaLinkService.ARTICLE_COVER, article.getId(), coverMediaId);
-            }
+                    contentMd, involvesVuln, visibility, parseTags(tags), coverMediaId, true);
             redirect.addFlashAttribute("message", "已提交，等待审核");
             return "redirect:/admin/articles";
         } catch (RuntimeException e) {

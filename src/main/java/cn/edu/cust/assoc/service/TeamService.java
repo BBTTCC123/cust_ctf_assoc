@@ -102,7 +102,11 @@ public class TeamService {
         TeamMemberEntity leader = new TeamMemberEntity();
         leader.setTeamId(team.getId());
         leader.setUserId(userId);
-        memberRepository.save(leader);
+        try {
+            memberRepository.saveAndFlush(leader);
+        } catch (DataIntegrityViolationException e) {
+            throw new BizException("你已经在一支战队里，先退出才能创建自己的战队");
+        }
         audit.record("TEAM_CREATE", "TEAM", team.getId(), null, cleanName);
         return team;
     }
@@ -125,7 +129,11 @@ public class TeamService {
         TeamMemberEntity member = new TeamMemberEntity();
         member.setTeamId(teamId);
         member.setUserId(target.getId());
-        memberRepository.save(member);
+        try {
+            memberRepository.saveAndFlush(member);
+        } catch (DataIntegrityViolationException e) {
+            throw new BizException("该成员已经在一支战队里");
+        }
         audit.record("TEAM_MEMBER_ADD", "TEAM", teamId, null,
                 target.getUsername() + " -> " + team.getName());
     }

@@ -43,6 +43,20 @@ rollback() {
 }
 trap rollback ERR
 
+prune_releases() {
+  local current
+  current=$(readlink -f "$APP_DIR/current")
+  find "$APP_DIR/releases" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' \
+    | sort -nr \
+    | tail -n +6 \
+    | cut -d' ' -f2- \
+    | while IFS= read -r old; do
+        if [ -n "$old" ] && [ "$old" != "$current" ]; then
+          rm -rf -- "$old"
+        fi
+      done
+}
+
 # 迁移前先备份数据库；备份脚本自身会做 my.cnf / 口令文件预检
 /usr/local/bin/backup-db.sh
 
@@ -52,6 +66,7 @@ systemctl restart xyx
 for _ in $(seq 1 30); do
   if curl -fsS http://127.0.0.1:8080/actuator/health 2>/dev/null | grep -q '"status":"UP"'; then
     echo "发布成功：$STAMP"
+    prune_releases
     trap - ERR
     exit 0
   fi
