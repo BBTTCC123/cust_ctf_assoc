@@ -60,7 +60,7 @@ class MemberPageTest {
         String html = engine().process("member", context);
 
         assertThat(html).contains("阿蓝");
-        assertThat(html).contains("能力雷达（六类竞赛）");
+        assertThat(html).contains("能力雷达 · 六类竞赛");
         assertThat(html).contains("<svg");
         assertThat(html).contains("radar-personal");
         assertThat(html).contains("radar-team");
