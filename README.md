@@ -110,6 +110,7 @@ FLUSH PRIVILEGES;
 | `DB_PASSWORD` | 空 | **必须设置** |
 | `ADMIN_USERNAME` | Yorkchain | 首个超管的登录名 |
 | `ADMIN_PASSWORD` | 无 | **必须设置**，至少 12 位、含三类字符；缺失或太弱会拒绝启动 |
+| `SERVER_ADDRESS` | 127.0.0.1 | 应用监听地址；默认仅供同机 Nginx 访问 |
 | `STORAGE_ROOT` | D:/spring_study/uploads | 上传文件根目录 |
 | `POINTS_BACKFILL_START` | 2015-01-01 | 积分补录允许的最早发生日期 |
 | `DEMO_DATA_ENABLED` | false | 开发环境设为 true 时加载演示荣誉数据 |
@@ -120,6 +121,11 @@ export ADMIN_PASSWORD='一次性强密码'
 ```
 
 超管只在库里没有这个用户名时创建；首次登录会强制改密。
+
+应用默认只监听 `127.0.0.1`，并只信任本机 Nginx 写入的
+`X-Forwarded-For` / `X-Forwarded-Proto`。如果 Nginx 不在同一台机器，
+必须显式设置 `SERVER_ADDRESS` 并通过防火墙只允许 Nginx 来源，不能直接把
+8080 对公网开放。
 
 ### 4. 跑
 

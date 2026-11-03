@@ -1,9 +1,15 @@
 server:
+  # 默认只监听回环地址，公网流量必须经过同机 Nginx。
+  # 如果 Nginx 与应用不在同一台机器，必须显式覆盖并用防火墙限制来源。
+  address: ${SERVER_ADDRESS:127.0.0.1}
   port: 8080
-  # 部署在 Nginx 后面：按 X-Forwarded-For / X-Forwarded-Proto 取真实客户端 IP 和协议。
-  # 前提是 Nginx 用 $remote_addr 覆盖 X-Forwarded-For（见 docs/部署清单.md），
-  # 且 8080 端口不直接对公网开放，否则客户端可以伪造代理头。
-  forward-headers-strategy: framework
+  # 只信任本机 Nginx 注入的转发头；不可信来源直接连接时忽略 X-Forwarded-*。
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Forwarded-For
+      protocol-header: X-Forwarded-Proto
+      internal-proxies: '127.0.0.0/8,::1/128'
 
 spring:
   application:
@@ -36,6 +42,7 @@ management:
   endpoints:
     web:
       exposure:
+        # 发布脚本只需要 health；不要改成通配符，否则会扩大管理端点暴露面。
         include: health
   endpoint:
     health:
