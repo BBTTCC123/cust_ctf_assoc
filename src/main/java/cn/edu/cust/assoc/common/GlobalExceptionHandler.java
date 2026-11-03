@@ -8,6 +8,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -39,6 +41,24 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String uploadTooLarge(MaxUploadSizeExceededException e, HttpServletRequest request, Model model) {
         model.addAttribute("message", "文件超过 10MB 上限，请压缩后再上传");
+        model.addAttribute("requestId", RequestIds.getOrCreate(request));
+        return "error/business";
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String invalidParameter(MethodArgumentTypeMismatchException e,
+                                   HttpServletRequest request, Model model) {
+        model.addAttribute("message", "请求参数格式不正确");
+        model.addAttribute("requestId", RequestIds.getOrCreate(request));
+        return "error/business";
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public String methodNotAllowed(HttpRequestMethodNotSupportedException e,
+                                   HttpServletRequest request, Model model) {
+        model.addAttribute("message", "该地址不支持当前请求方式");
         model.addAttribute("requestId", RequestIds.getOrCreate(request));
         return "error/business";
     }

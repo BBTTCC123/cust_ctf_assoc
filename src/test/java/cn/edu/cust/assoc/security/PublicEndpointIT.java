@@ -4,6 +4,8 @@ import cn.edu.cust.assoc.support.IntegrationTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.tomcat.autoconfigure.TomcatServerProperties;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
@@ -13,6 +15,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -34,6 +37,12 @@ class PublicEndpointIT extends IntegrationTestBase {
     @Autowired
     private LoginAttemptService loginAttempts;
 
+    @Autowired
+    private ServerProperties serverProperties;
+
+    @Autowired
+    private TomcatServerProperties tomcatProperties;
+
     @Test
     void securityHeadersAreSentOnPublicPages() throws Exception {
         for (String url : new String[]{"/", "/login", "/register", "/join"}) {
@@ -48,6 +57,31 @@ class PublicEndpointIT extends IntegrationTestBase {
                     .andExpect(header().string("X-Frame-Options", "DENY"))
                     .andExpect(header().string("Referrer-Policy", "same-origin"));
         }
+    }
+
+    @Test
+    void forwardedHeadersAreOnlyTrustedFromLoopbackProxy() {
+        org.assertj.core.api.Assertions.assertThat(serverProperties.getAddress().isLoopbackAddress()).isTrue();
+        org.assertj.core.api.Assertions.assertThat(serverProperties.getForwardHeadersStrategy())
+                .isEqualTo(ServerProperties.ForwardHeadersStrategy.NATIVE);
+        org.assertj.core.api.Assertions.assertThat(tomcatProperties.getRemoteip().getRemoteIpHeader())
+                .isEqualToIgnoringCase("X-Forwarded-For");
+        org.assertj.core.api.Assertions.assertThat(tomcatProperties.getRemoteip().getInternalProxies())
+                .contains("127.0.0.0/8", "::1/128");
+    }
+
+    @Test
+    void malformedParameterReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/competitions").param("season", "not-a-year"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("请求参数格式不正确")));
+    }
+
+    @Test
+    void unsupportedMethodReturnsMethodNotAllowed() throws Exception {
+        mockMvc.perform(get("/articles/1/comments"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(content().string(containsString("该地址不支持当前请求方式")));
     }
 
     @Test
