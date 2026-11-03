@@ -2,6 +2,7 @@ package cn.edu.cust.assoc.security;
 
 import cn.edu.cust.assoc.domain.RegistrationInviteEntity;
 import cn.edu.cust.assoc.domain.UserEntity;
+import cn.edu.cust.assoc.repository.AuditLogRepository;
 import cn.edu.cust.assoc.repository.RegistrationInviteRepository;
 import cn.edu.cust.assoc.support.IntegrationTestBase;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,9 @@ class AuthenticationFlowIT extends IntegrationTestBase {
     @Autowired
     private SessionRegistry sessionRegistry;
 
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+
     @Test
     void activeAccountCanLoginAndWrongPasswordIsRejected() throws Exception {
         UserEntity user = createActiveUser("login", PASSWORD);
@@ -52,6 +56,29 @@ class AuthenticationFlowIT extends IntegrationTestBase {
                         .param("password", "WrongPass!2026"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error"));
+    }
+
+    @Test
+    void authenticationEventsAreAuditedWithoutPasswords() throws Exception {
+        UserEntity user = createActiveUser("auditlogin", PASSWORD);
+
+        MockHttpSession session = login(user.getUsername(), PASSWORD);
+        mockMvc.perform(post("/login").with(csrf())
+                        .param("username", user.getUsername())
+                        .param("password", "NeverLogThis!2026"))
+                .andExpect(redirectedUrl("/login?error"));
+        mockMvc.perform(post("/logout").with(csrf()).session(session))
+                .andExpect(redirectedUrl("/"));
+
+        var events = auditLogRepository.findAll().stream()
+                .filter(event -> user.getUsername().equals(event.getOperatorName()))
+                .toList();
+        assertThat(events).extracting("action")
+                .contains(AuthenticationAuditService.LOGIN_SUCCESS,
+                        AuthenticationAuditService.LOGIN_FAILURE,
+                        AuthenticationAuditService.LOGOUT);
+        assertThat(events).allSatisfy(event ->
+                assertThat(String.valueOf(event.getDetailAfter())).doesNotContain("NeverLogThis!2026"));
     }
 
     @Test

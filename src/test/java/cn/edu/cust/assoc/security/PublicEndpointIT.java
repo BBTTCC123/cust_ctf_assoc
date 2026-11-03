@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.security;
 
+import cn.edu.cust.assoc.repository.AuditLogRepository;
 import cn.edu.cust.assoc.support.IntegrationTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
@@ -36,6 +37,9 @@ class PublicEndpointIT extends IntegrationTestBase {
 
     @Autowired
     private LoginAttemptService loginAttempts;
+
+    @Autowired
+    private AuditLogRepository auditLogRepository;
 
     @Autowired
     private ServerProperties serverProperties;
@@ -133,6 +137,13 @@ class PublicEndpointIT extends IntegrationTestBase {
                         .param("password", "LoginLimit!2026abc"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error=too_many"));
+
+        org.assertj.core.api.Assertions.assertThat(auditLogRepository.findAll())
+                .anySatisfy(event -> {
+                    org.assertj.core.api.Assertions.assertThat(event.getOperatorName()).isEqualTo(username);
+                    org.assertj.core.api.Assertions.assertThat(event.getAction())
+                            .isEqualTo(AuthenticationAuditService.LOGIN_COOLDOWN);
+                });
     }
 
     private String nextStudentNo() {

@@ -24,7 +24,7 @@
         <p class="lead">使用协会分配的账号登录。</p>
         <p th:if="${message}" class="ok" th:text="${message}"></p>
         <p th:if="${param.error != null and param.error[0] != 'too_many'}" class="err">账号或密码不对</p>
-        <p th:if="${param.error != null and param.error[0] == 'too_many'}" class="err">登录失败次数过多，请 15 分钟后再试</p>
+        <p th:if="${param.error != null and param.error[0] == 'too_many'}" class="err">登录失败次数过多，请稍后再试</p>
         <p th:if="${param.logout}" class="ok">已经退出登录</p>
         <form method="post" th:action="@{/login}" class="login-form">
             <label>账号
