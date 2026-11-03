@@ -1,5 +1,6 @@
 package cn.edu.cust.assoc.config;
 
+import cn.edu.cust.assoc.security.AuthenticationAuditService;
 import cn.edu.cust.assoc.security.DbUserDetailsService;
 import cn.edu.cust.assoc.security.LoginAttemptService;
 import cn.edu.cust.assoc.security.LoginRateLimitFilter;
@@ -55,7 +56,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, DbUserDetailsService userDetailsService,
-                                           LoginAttemptService loginAttempts)
+                                           LoginAttemptService loginAttempts,
+                                           AuthenticationAuditService authAudit)
             throws Exception {
         http
             .userDetailsService(userDetailsService)
@@ -109,8 +111,13 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
+                .addLogoutHandler((request, response, authentication) -> {
+                    if (authentication != null) {
+                        authAudit.logout(authentication.getName());
+                    }
+                })
             )
-            .addFilterBefore(new LoginRateLimitFilter(loginAttempts),
+            .addFilterBefore(new LoginRateLimitFilter(loginAttempts, authAudit),
                     UsernamePasswordAuthenticationFilter.class)
             // 登录成功还没改密的人，除了改密页哪都去不了
             .addFilterAfter(new MustChangePasswordFilter(), AuthorizationFilter.class);

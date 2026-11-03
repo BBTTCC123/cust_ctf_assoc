@@ -63,6 +63,23 @@ public class AuditService {
         repository.save(log);
     }
 
+    @Transactional
+    public void recordAuthenticationEvent(String action, String attemptedUsername, String detail) {
+        AuditLogEntity log = new AuditLogEntity();
+        log.setAction(action);
+        log.setTargetType("AUTH");
+        log.setOperatorName(trimOperatorName(attemptedUsername));
+        log.setDetailAfter(trim(detail));
+
+        RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+        if (attrs instanceof ServletRequestAttributes servletAttrs) {
+            HttpServletRequest request = servletAttrs.getRequest();
+            log.setIp(request.getRemoteAddr());
+            log.setRequestId(RequestIds.getOrCreate(request));
+        }
+        repository.save(log);
+    }
+
     @Transactional(readOnly = true)
     public Page<AuditLogEntity> search(String operator, String action, String targetType,
                                        LocalDateTime from, LocalDateTime to, Pageable pageable) {
@@ -73,6 +90,12 @@ public class AuditService {
     private String trim(String value) {
         if (value == null) return null;
         return value.length() <= MAX_DETAIL ? value : value.substring(0, MAX_DETAIL);
+    }
+
+    private String trimOperatorName(String value) {
+        if (value == null || value.isBlank()) return null;
+        String normalized = value.strip().replaceAll("\\p{Cntrl}", " ");
+        return normalized.length() <= 64 ? normalized : normalized.substring(0, 64);
     }
 
     private String blankToNull(String value) {
